@@ -1,6 +1,6 @@
 import {Request,Response} from 'express'
 import passportAuth from '../config/passport'
-import session from 'express-session'
+import axios from 'axios'
 
 interface AuthenticatedRequest extends Request {
     user?: {
@@ -22,18 +22,35 @@ export const googleAuthCallback = passportAuth.authenticate('google', {
     failureRedirect: '/auth/callback/failure'
 });
 
-export const authSuccess = (req: AuthenticatedRequest, res: Response) => {
+export const authSuccess = async(req: AuthenticatedRequest, res: Response) => {
     if (!req.user) {
         return res.redirect('/auth/callback/failure');
     }
-    const username = req.user.displayName
-    req.session.username = username
-    res.redirect(`http://localhost:5173/?username=${encodeURIComponent(username as string)}`);
+
+    try {
+    const email =  req.user.email
+    const checkMailResponse = await axios.post("http://localhost:3000/checkMail",{email})
+    if(checkMailResponse.data.emailExists){
+        const token = checkMailResponse.data.token
+       return res.redirect(`http://localhost:5173/?token=${token}`)
+    }else{
+        const userName = req.user.displayName
+        const storeMail = await axios.post("http://localhost:3000/userRegister",{userName,password:'123456',email})
+        if(storeMail){
+            const token = storeMail.data.token
+            return res.redirect(`http://localhost:5173/?token=${token}`)
+        }
+    }
+    } catch (error) {
+        console.error('error in checking mail of google auth',error)
+    }
+    
+    
 };
 
 
 export const authFailure = (req: Request, res: Response) => {
-    res.send("Error");
+    res.redirect('http://localhost:5173/login')
 };
 
 

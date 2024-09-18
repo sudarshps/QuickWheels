@@ -4,11 +4,14 @@ import cors from 'cors'
 import session from 'express-session'
 import userRoutes from './routes/user_routes'
 import authRoutes from './routes/auth_routes'
+import adminRoutes from './routes/admin_routes'
 import otpRoutes from './routes/otp_routes'
 import connectDb from './config/database'
 import passportAuth from './config/passport'
+import path from 'path'
+import cookieParser = require('cookie-parser')
 
-
+ 
 dotenv.config()
 
 const app = express()
@@ -20,6 +23,10 @@ app.use(cors({
     methods:['GET','POST','PUT','DELETE'],
     credentials:true
 }))
+
+app.use(cookieParser())
+
+app.use('/Uploads',express.static(path.join(__dirname,'Uploads')))
 
 app.use(session({
     secret: 'secret-key',
@@ -36,6 +43,7 @@ app.use(express.json())
 app.use('/',userRoutes)
 app.use('/',authRoutes)
 app.use('/',otpRoutes)
+app.use('/admin',adminRoutes)
 
 const PORT = process.env.port || 3000
 

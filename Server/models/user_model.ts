@@ -1,36 +1,42 @@
+import { ObjectId } from 'mongodb';
 import mongoose,{Date, Document,Schema} from 'mongoose'
 
 
 export interface IUser extends Document {
+    _id?:ObjectId;
     name:string;
     email:string;
     password:string;
-    dob:Date;
-    phone:Number;
-    drivingExpDate:Date;
-    address:String;
-    drivingID:String;
-    drivingIDFront:String;
-    drivingIDBack:String;
+    dob:string;
+    phone:string;
+    drivingExpDate:string;
+    address:string;
+    drivingID:string;
+    drivingIDFront:string;
+    drivingIDBack:string;
     isHost:Boolean;
     isVerified:Boolean;
-    profileImage:String
+    profileUpdated:Boolean;
+    profileImage:string;
+    status:string;
 }
 
 const userSchema:Schema<IUser>= new Schema({
     name:{type:String},
     email:{type:String,required:true},
     password:{type:String},
-    dob:{type:Date},
-    phone:{type:Number},
-    drivingExpDate:{type:Date},
+    dob:{type:String},
+    phone:{type:String},
+    drivingExpDate:{type:String},
     address:{type:String},
     drivingID:{type:String},
     drivingIDFront:{type:String},
     drivingIDBack:{type:String},
     isHost:{type:Boolean},
     isVerified:{type:Boolean},
-    profileImage:{type:String}
+    profileUpdated:{type:Boolean},
+    profileImage:{type:String},
+    status:{type:String}
 },{timestamps:true})
 
 
