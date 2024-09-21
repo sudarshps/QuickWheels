@@ -8,7 +8,7 @@ class AdminController {
             const getUsers = await AdminService.getUsers()
             res.json(getUsers)
         } catch (error) {
-            console.error('error in getting user list')
+            console.error('error in getting user list',error)
         }
     }
 
@@ -24,6 +24,32 @@ class AdminController {
             
         } catch (error) {
             console.error('error getting user details',error)
+        }
+    }
+
+    async getHostDetails(req:Request,res:Response):Promise<void>{
+        try {
+            const {id} = req.query
+            if(!id){
+                res.status(400).json({message:"ID parameter is missing"})
+                return
+            }
+            const getHostDetails = await AdminService.hostDetails(id as string)
+            
+            res.json(getHostDetails)
+        } catch (error) {
+            console.error('error in fetching host details',error);
+            
+        }
+    }
+
+
+    async getHostList(req:Request,res:Response):Promise<void> {
+        try {
+            const getHosts = await AdminService.hostList()
+            res.json(getHosts)
+        } catch (error) {
+            console.error('error in fetching host list',error);
         }
     }
 
@@ -60,6 +86,18 @@ class AdminController {
         } catch (error) {
             console.error('error in verifying user',error);
             
+        }
+    }
+
+    async verifyHost(req:Request,res:Response):Promise<void> {
+        try {
+            const{hostStatus,id} = req.body
+            console.log('ethi',id);
+            
+            const response = await AdminService.verifyHost(hostStatus,id)
+            res.json(response)
+        } catch (error) {
+            console.error('error in verifying host',error);
         }
     }
 }

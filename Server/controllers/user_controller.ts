@@ -2,6 +2,7 @@ import { Request, Response, Express } from "express";
 import UserService from "../services/user_service";
 import { IUser } from "../models/user_model";
 import upload from "../services/upload_service";
+import { renewToken } from "../utils/jwt_utils";
 
 
 interface UploadedUserFiles {
@@ -27,7 +28,8 @@ class UserController {
         isVerified: false,
         isHost: false,
         profileUpdated:false,
-        status:'Verification Pending'
+        status:'Verification Pending',
+        approvedHost:false
       });
       res.json(createUser);
     } catch (error) {
@@ -220,7 +222,6 @@ class UserController {
     try {
       const carDetails = await UserService.getCarDetails(email)
       if(carDetails){
-        
         res.json(carDetails)
       }
       
@@ -229,11 +230,37 @@ class UserController {
       console.error('error fetching user details',error)
     }
   }
+
+
+  async rentCarDetails(req:Request,res:Response): Promise<void> {
+    try {
+      const sort = req.query.sort as string
+      const transmission = req.query.transmission as string[] 
+      const fuel = req.query.fuel as string[] 
+      const seat = req.query.seat as string[] 
+       
+      
+      const carDetails = await UserService.rentCarDetails(sort,transmission,fuel,seat)
+      res.json(carDetails)
+    } catch (error) {
+      console.error('error in fetching rent car details',error);
+      
+    }
+  }
+
+  async userCarDetails(req:Request,res:Response):Promise<void> {
+    try {
+      const {id} = req.query
+      const carDetails = await UserService.userCarDetails(id as string)   
+      res.json(carDetails)
+         
+    } catch (error) {
+      console.error('error in fetching user car details',error);
+      
+    }
+  }
  
 }
-
-
-
 
 
  

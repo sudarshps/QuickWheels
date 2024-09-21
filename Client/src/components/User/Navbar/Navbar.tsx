@@ -13,7 +13,11 @@ import axios from "axios";
 import { setCredentials } from "../../../slices/authSlice";
 import { setUserDetails } from "../../../slices/userDetailSlice";
 
-const Navbar: React.FC = () => {
+interface NavbarProps{
+  className?:string
+}
+
+const Navbar: React.FC<NavbarProps> = ({className}) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -124,7 +128,7 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className={`p-4 fixed w-full z-50 transition-colors duration-300 ${isScrolled?'bg-white shadow-md':'bg-transparent'}`}>
+    <nav className={`${className} p-4 fixed w-full z-50 transition-colors duration-300 ${isScrolled?'bg-white shadow-md':'bg-transparent'}`}>
       <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-12 p-4">
         <Link
           to="http://localhost:5173/"

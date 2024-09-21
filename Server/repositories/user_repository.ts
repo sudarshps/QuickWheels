@@ -1,5 +1,6 @@
 import User,{IUser} from '../models/user_model'
 import CarModel,{ICar} from '../models/car_model'
+import { ObjectId } from 'mongoose';
 
 
 class UserRepository {
@@ -76,8 +77,18 @@ class UserRepository {
         }
     }
 
-    
+    async getRentCarDetails():Promise<ICar[] | null> {
+        return await CarModel.find()
+    }
 
+    async userCarDetails(id:string):Promise<ICar | null> {
+        return await CarModel.findById(id)
+    }
+
+    async getUserDetails(id:string):Promise<IUser | null> {
+        return await User.findById(id)
+    }
+ 
 }
 
 

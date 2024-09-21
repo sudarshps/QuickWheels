@@ -13,7 +13,8 @@ router.post('/userprofile',upload.fields([{name:'drivingIDFront',maxCount:1},{na
 router.post('/logout',userController.userLogout)
 router.get('/authorized',verifyUser,userController.authorizedUser) 
 router.get('/userDetails',userController.userDetails)
-
+router.get('/getrentcardetails',userController.rentCarDetails)
+router.get('/cardetails',userController.userCarDetails)
 
 
 router.post('/hostregister',upload.fields([{name:'images',maxCount:5},{name:'RCDoc',maxCount:1},{name:'InsuranceDoc',maxCount:1}]),userController.hostCarDetails)

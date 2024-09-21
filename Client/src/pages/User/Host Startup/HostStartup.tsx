@@ -13,6 +13,7 @@ const HostStartup:React.FC = () => {
 
      
       const [updatedProfile, setUpdatedProfile] = useState(false);
+      const [verified, setVerified] = useState(false);
 
 
   useEffect(() => {
@@ -31,6 +32,7 @@ const HostStartup:React.FC = () => {
                 if (res.data) {
                   
                   setUpdatedProfile(res.data.profileUpdated)
+                  setVerified(res.data.isVerified)
 
                 }
               });
@@ -51,7 +53,12 @@ const HostStartup:React.FC = () => {
 
     const handleHostRoute = () => {
       if(updatedProfile){
-        navigate('/hostregister')
+        if(verified){
+          navigate('/hostregister')
+        }else{
+          alert('You need to verify by admin!')
+          navigate('/')
+        }
       }else{
         alert('please complete your profile details')
         navigate('/profile')

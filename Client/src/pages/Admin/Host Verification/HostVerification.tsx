@@ -1,52 +1,55 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../../../components/Admin/Navbar/AdminNavbar";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const UserVerification: React.FC = () => {
+const HostVerification: React.FC = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const id = queryParams.get("id");
 
   const navigate = useNavigate();
 
-  interface UserDetails {
-    name: string;
-    email: string;
-    address: string;
-    dob: string;
-    drivingExpDate: string;
-    drivingID: string;
-    drivingIDBack: string;
-    drivingIDFront: string;
+  interface HostDetails {
+    make: string;
+    carModel: string;
+    transmission: string;
+    seatCapacity: string;
+    fuel: string;
+    rentAmount: string;
+    registerNumber: string;
+    insuranceExp: string;
     phone: string;
+    RCDoc:string;
+    InsuranceDoc:string;
     isVerified:boolean;
+    images:string;
   }
 
-  const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
+  const [hostDetails, setHostDetails] = useState<HostDetails | null>(null);
   const [frontIsEnlarged, setFrontIsEnlarged] = useState(false);
   const [backIsEnlarged, setBackIsEnlarged] = useState(false);
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/admin/getuserdetails", {
+      .get("http://localhost:3000/admin/gethostdetails", {
         params: {
           id: id,
         },
       })
-      .then((res) => setUserDetails(res.data));
+      .then((res) => {
+        setHostDetails(res.data)        
+      });
   }, [id]);
 
   const handleProceed = (status: string) => {
-    let userStatus = "Verified"
+    let hostStatus = "Verified"
     if(status==="reject"){
-      userStatus = "Not Verified"
+      hostStatus = "Not Verified"
     }
     
       axios
-        .post("http://localhost:3000/admin/verifyuser", { userStatus, id })
+        .post("http://localhost:3000/admin/verifyhost", { hostStatus, id })
         .then((res) => {
           if (res.data.statusUpdated) {
             alert("status updated!");
@@ -64,11 +67,11 @@ const UserVerification: React.FC = () => {
       <div className="p-4 md:p-6">
         <div className="pl-44 mb-8">
           <h2 className="text-white text-xl md:text-2xl font-semibold">
-            User Verification
+            Host Verification
           </h2>
         </div>
         <div className="bg-gradient-to-br from-[#10114f] to-[#1416b5] rounded-md shadow-lg w-full max-w-3xl p-8 mx-auto space-y-8">
-          <div className="flex items-center space-x-6 ml-28">
+          {/* <div className="flex items-center space-x-6 ml-28">
             <div className="w-24 h-24 rounded-full bg-gray-200 flex justify-center items-center">
               <FontAwesomeIcon
                 icon={faUser}
@@ -81,43 +84,55 @@ const UserVerification: React.FC = () => {
               </h1>
               <p className="text-gray-300">{userDetails?.email}</p>
             </div>
-          </div>
+          </div> */}
+
+            <div className="grid grid-cols-1 md:grid-cols-2">
+            <div className="w-60 h-40 bg-gray-200 rounded flex justify-center items-center ml-28">
+                <img src={`http://localhost:3000/${hostDetails?.images[0]}`} alt="" />
+              </div>
+
+              <div className='flex flex-col ml-28 gap-4'>
+                <h1 className="text-white text-2xl font-bold">{hostDetails?.make}<span> {hostDetails?.carModel}</span></h1>
+                <h2 className="text-white text-lg ">{hostDetails?.registerNumber}</h2>
+              </div>
+            </div>
+              
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="text-white ml-28">
-              <label className="text-gray-300">Address:</label>
+              <label className="text-gray-300">Fuel Type:</label>
               <h2 className="text-lg font-semibold mb-4">
-                {userDetails?.address}
+                {hostDetails?.fuel}
               </h2>
-              <label className="text-gray-300">Phone:</label>
+              <label className="text-gray-300">Seat Capacity:</label>
 
               <h2 className="text-lg font-semibold mb-4">
-                {userDetails?.phone}
+                {hostDetails?.seatCapacity}
               </h2>
 
-              <label className="text-gray-300">Date of Birth:</label>
+              <label className="text-gray-300">Transmission:</label>
 
-              <h2 className="text-lg font-semibold mb-4">{userDetails?.dob}</h2>
+              <h2 className="text-lg font-semibold mb-4">{hostDetails?.transmission}</h2>
             </div>
             <div className="text-white ml-28">
-              <label className="text-gray-300">Driving Licence ID:</label>
+              <label className="text-gray-300">Rent Amount:</label>
               <h2 className="text-lg font-semibold mb-4">
-                {userDetails?.drivingID}
+                {hostDetails?.rentAmount}<span className="text-md font-normal text-gray-200">/hr</span>
               </h2>
-              <label className="text-gray-300">Expiry Date:</label>
+              <label className="text-gray-300">Insurance Expiry:</label>
 
               <h2 className="text-lg font-semibold mb-4">
-                {userDetails?.drivingExpDate}
+               {hostDetails?.insuranceExp}
               </h2>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="flex flex-col items-center ml-8">
-              <h2 className="text-lg text-white mb-2">License Front</h2>
+              <h2 className="text-lg text-white mb-2">Insurance</h2>
               <div className="w-40 h-24 bg-gray-200 rounded-md">
                 <img
-                  src={`http://localhost:3000/${userDetails?.drivingIDFront}`}
+                  src={`http://localhost:3000/${hostDetails?.InsuranceDoc}`}
                   alt="License Front"
                   className={`w-full h-full object-cover transform transition-transform duration-300 hover:scale-150 ${
                     frontIsEnlarged ? "scale-200" : "scale-100"
@@ -128,10 +143,10 @@ const UserVerification: React.FC = () => {
             </div>
 
             <div className="flex flex-col items-center ml-8">
-              <h2 className="text-lg text-white mb-2">License Back</h2>
+              <h2 className="text-lg text-white mb-2">RC</h2>
               <div className="w-40 h-24 bg-gray-200 rounded-md">
                 <img
-                  src={`http://localhost:3000/${userDetails?.drivingIDBack}`}
+                  src={`http://localhost:3000/${hostDetails?.RCDoc}`}
                   alt="License Back"
                   onClick={() => setBackIsEnlarged(!backIsEnlarged)}
                   className="w-full h-full object-cover transform transition-transform duration-300 hover:scale-150 "
@@ -148,11 +163,11 @@ const UserVerification: React.FC = () => {
               Reject
             </button>
             <button
-              className={`bg-blue-500 ${!userDetails?.isVerified?`hover:bg-blue-600`:``} text-white font-bold py-2 px-4 rounded`}
+              className={`bg-blue-500 ${!hostDetails?.isVerified?`hover:bg-blue-600`:``} text-white font-bold py-2 px-4 rounded`}
               onClick={() => handleProceed("approve")}
-              disabled={userDetails?.isVerified?true:false}
+              disabled={hostDetails?.isVerified?true:false}
             >
-              {userDetails?.isVerified?`Approved`:`Approve`}
+              {hostDetails?.isVerified?`Approved`:`Approve`}
             </button>
           </div>
         </div>
@@ -161,4 +176,4 @@ const UserVerification: React.FC = () => {
   );
 };
 
-export default UserVerification;
+export default HostVerification;

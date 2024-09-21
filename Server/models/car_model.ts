@@ -3,7 +3,7 @@ import mongoose,{Document,Schema} from 'mongoose'
 
 
 export interface ICar extends Document{
-    _id?:ObjectId
+    _id:ObjectId
     userId:ObjectId,
     make:string,
     carModel:string,
