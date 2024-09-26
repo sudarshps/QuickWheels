@@ -25,14 +25,24 @@ const CarsList: React.FC = () => {
   const[seat,setSeat] = useState<string[]>([]) 
   const[distance,setDistance] = useState<string[]>(['0']) 
   const [carListings, setCarListings] = useState<CarDetailsType[]>([]);
+  const [searchValue,setSearchValue] = useState('')
+
+  const[userSearch,setUserSearch] = useState('')
   
-  const handleSortChange = (sort:string,transmission:string[],fuel:string[],seat:string[],distance:string[]) => {    
+  const handleSortChange = (sort:string,transmission:string[],fuel:string[],seat:string[],distance:string[],search:string) => {    
       setSort(sort)
       setTransmission(transmission)
       setFuel(fuel)
       setSeat(seat)
       setDistance(distance)
+      setUserSearch(search)
   }
+  
+
+  const handleSearch = (input:string) =>{
+    setSearchValue(input)
+  }
+  
 
   useEffect(() => {
     let lng = 0
@@ -45,13 +55,13 @@ const CarsList: React.FC = () => {
     axios
       .get("http://localhost:3000/getrentcardetails", {
         params:{
-          sort,transmission,fuel,seat,distance,lng,lat
+          sort,transmission,fuel,seat,distance,userSearch,lng,lat
         }
       })
       .then((res) => {
         setCarListings(res.data);
       });
-  }, [sort,transmission,fuel,seat,distance]);
+  }, [sort,transmission,fuel,seat,distance,userSearch]);
 
   
 
@@ -61,7 +71,8 @@ const CarsList: React.FC = () => {
     <>
       <Navbar className="top-0" />
       <main className="container mx-auto px-4 py-8 mt-24">
-        <SearchSection/>
+      <SearchSection onSearch={handleSearch}/>
+
         {/* <div className="flex flex-col md:flex-row justify-between mx-12 p-4 items-center mb-8">
           <div className="flex items-center space-x-4 mb-4 md:mb-0">
             <span className="font-semibold">Date</span>
@@ -92,7 +103,7 @@ const CarsList: React.FC = () => {
         </div> */}
 
         <div className="flex flex-col md:flex-row mx-12 p-4">
-          <FilterSection onSortChange={handleSortChange}/>
+          <FilterSection onSortChange={handleSortChange} search={searchValue}/>
           <CarListSection carListings={carListings}/>
         </div>
       </main>

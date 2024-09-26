@@ -95,8 +95,16 @@ class UserService {
     };
   }
 
-  async userProfile(userData: Partial<IUser>,longitude:number,latitude:number): Promise<UserUpdateResponse> {
-    const user = await userRepository.updateUserProfile(userData,longitude,latitude);
+  async userProfile(
+    userData: Partial<IUser>,
+    longitude: number,
+    latitude: number
+  ): Promise<UserUpdateResponse> {
+    const user = await userRepository.updateUserProfile(
+      userData,
+      longitude,
+      latitude
+    );
 
     if (user) {
       return {
@@ -208,7 +216,6 @@ class UserService {
     );
 
     if (carDetails) {
-
       return {
         updatedCarDetails: true,
         message: "Car Details Created",
@@ -247,22 +254,32 @@ class UserService {
     transmission: string[],
     fuel: string[],
     seat: string[],
-    lng:number,
-    lat:number,
-    distanceValue:number
+    lng: number,
+    lat: number,
+    distanceValue: number,
+    searchInput: string
   ): Promise<ICar[] | null> {
-    
-    let carDetails = await userRepository.getRentCarDetails();    
-    
+    let carDetails = await userRepository.getRentCarDetails();
 
-    if(carDetails && lng!==0 && lat!==0){
-      carDetails = await userRepository.getCarDistance(lng,lat,distanceValue)
+    if (carDetails && lng !== 0 && lat !== 0) {
+      carDetails = await userRepository.getCarDistance(lng, lat, distanceValue);
+
+      if (carDetails && searchInput.trim()) {
+        const regex = new RegExp(searchInput, "i");
+        carDetails = carDetails?.filter(
+          (car) =>
+            regex.test(car.make) ||
+            regex.test(car.carModel) ||
+            regex.test(car.transmission) ||
+            regex.test(car.seatCapacity) ||
+            regex.test(car.fuel)
+        );
+      }
     }
 
     if (!carDetails) {
       return null;
     }
-    
 
     // if(carDetails && lng!==0 && lat!==0){
     //   let nearestLocation = await userRepository.getUsersLocation(lng,lat)
@@ -271,25 +288,23 @@ class UserService {
     //     userId.push(user._id)
     //   })
 
-      
-      
     //   carDetails = carDetails.filter((car) => userId.some((user:any) => user._id.toString() === car.userId._id.toString()));
     //   // console.log('card',carDetails);
-      
+
     // }
 
     if (transmission && transmission.length > 0) {
-        carDetails = carDetails.filter((car) =>
-        transmission.includes(car.transmission))
+      carDetails = carDetails.filter((car) =>
+        transmission.includes(car.transmission)
+      );
     }
 
     if (fuel && fuel.length > 0) {
       carDetails = carDetails.filter((car) => fuel.includes(car.fuel));
     }
 
-    if(seat && seat.length > 0){
-      carDetails = carDetails.filter((car) =>
-      seat.includes(car.seatCapacity))
+    if (seat && seat.length > 0) {
+      carDetails = carDetails.filter((car) => seat.includes(car.seatCapacity));
     }
 
     if (sort === "lowtohigh") {

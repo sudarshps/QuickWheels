@@ -235,9 +235,11 @@ class UserController {
       const fuel = req.query.fuel as string[] 
       const seat = req.query.seat as string[] 
       const distance = req.query.distance as string[]
+      const searchInput = req.query.userSearch as string
       let lngQuery = req.query.lng
       let latQuery = req.query.lat    
       let distanceValue = 0
+  
       if(distance){
         distanceValue = parseFloat(distance[0])
       }
@@ -258,7 +260,7 @@ class UserController {
       return;
     }
       
-      const carDetails = await UserService.rentCarDetails(sort,transmission,fuel,seat,lng,lat,distanceValue)      
+      const carDetails = await UserService.rentCarDetails(sort,transmission,fuel,seat,lng,lat,distanceValue,searchInput)      
       res.json(carDetails)
     } catch (error) {
       console.error('error in fetching rent car details',error);

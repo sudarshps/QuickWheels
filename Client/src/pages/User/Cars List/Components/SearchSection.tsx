@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLocationArrow,faSearch } from "@fortawesome/free-solid-svg-icons";
 
-const SearchSection:React.FC = () => {
+const SearchSection:React.FC = ({onSearch}) => {
 
     const[searchValue,setSearchValue] = useState('')
     const[userLocation,setUserLocation] = useState('')
 
     const handleSearch = () => {
-        
+        onSearch(searchValue)
     }
 
     const getUserLocation = () => {
