@@ -5,7 +5,6 @@ const CarListSection: React.FC = ({carListings}) => {
   
   const navigate = useNavigate();
 
-
   return (
     <>
       <section className="w-full md:w-3/4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -26,10 +25,13 @@ const CarListSection: React.FC = ({carListings}) => {
                 <p className="text-gray-600 mb-2">
                   {car.transmission} · {car.fuel} · {car.seatCapacity}
                 </p>
-                <div className="flex justify-between items-center">
-                  <span className="text-2xl font-bold">
+                <div className="grid grid-cols-2 items-center">
+                  <div className="text-2xl font-bold">
                     ₹{car.rentAmount}/hr
-                  </span>
+                  </div>
+                  {sessionStorage.getItem('userlocation')?<div className="text-right">
+                    <span className="text-xl mr-1 font-semibold">{Math.floor(car.distance/1000)}</span><span className="text-gray-600 text-sm ">KM away</span>
+                  </div>:''}
                 </div>
               </div>
             </div>

@@ -79,9 +79,8 @@ class UserController {
     if (!req.files) {
       return res.status(400).json({ message: "No files uploaded" });
     }
-        let userData = req.body
-        
-        
+        let {longitude,latitude,...userData} = req.body
+                
     function isUploadedFiles(files: any): files is UploadedUserFiles {
       return (
         files &&
@@ -101,7 +100,7 @@ class UserController {
       userData.drivingIDBack = paths.drivingIDBackPath
       userData.profileUpdated = true
 
-      const userProfile = await UserService.userProfile(userData)
+      const userProfile = await UserService.userProfile(userData,longitude,latitude)
 
       res.json(userProfile)
       
@@ -155,8 +154,6 @@ class UserController {
       if(userDetails){
         res.json(userDetails)            
       }
-      
-      
     } catch (error) {
       console.error('error fetching user details',error)
     }
@@ -168,7 +165,6 @@ class UserController {
     try {
       const {email,...rest} = req.body;
        
-             
       if (!req.files) {
         
         return res.status(400).json({ message: "No files uploaded" });
@@ -238,13 +234,34 @@ class UserController {
       const transmission = req.query.transmission as string[] 
       const fuel = req.query.fuel as string[] 
       const seat = req.query.seat as string[] 
-       
+      const distance = req.query.distance as string[]
+      let lngQuery = req.query.lng
+      let latQuery = req.query.lat    
+      let distanceValue = 0
+      if(distance){
+        distanceValue = parseFloat(distance[0])
+      }
+
+      let lng: number | undefined;
+      let lat: number | undefined;
+
+    if (typeof lngQuery === 'string') {
+      lng = parseFloat(lngQuery);
+    }
+
+    if (typeof latQuery === 'string') {
+      lat = parseFloat(latQuery);
+    }
+
+    if (lng === undefined || isNaN(lng) || lat === undefined || isNaN(lat)) {
+      res.status(400).send({ error: "Invalid longitude or latitude value" });
+      return;
+    }
       
-      const carDetails = await UserService.rentCarDetails(sort,transmission,fuel,seat)
+      const carDetails = await UserService.rentCarDetails(sort,transmission,fuel,seat,lng,lat,distanceValue)      
       res.json(carDetails)
     } catch (error) {
       console.error('error in fetching rent car details',error);
-      
     }
   }
 

@@ -95,8 +95,8 @@ class UserService {
     };
   }
 
-  async userProfile(userData: Partial<IUser>): Promise<UserUpdateResponse> {
-    const user = await userRepository.updateUserProfile(userData);
+  async userProfile(userData: Partial<IUser>,longitude:number,latitude:number): Promise<UserUpdateResponse> {
+    const user = await userRepository.updateUserProfile(userData,longitude,latitude);
 
     if (user) {
       return {
@@ -208,6 +208,7 @@ class UserService {
     );
 
     if (carDetails) {
+
       return {
         updatedCarDetails: true,
         message: "Car Details Created",
@@ -245,16 +246,40 @@ class UserService {
     sort: string,
     transmission: string[],
     fuel: string[],
-    seat: string[]
+    seat: string[],
+    lng:number,
+    lat:number,
+    distanceValue:number
   ): Promise<ICar[] | null> {
-    let carDetails = await userRepository.getRentCarDetails();
+    
+    let carDetails = await userRepository.getRentCarDetails();    
+    
+
+    if(carDetails && lng!==0 && lat!==0){
+      carDetails = await userRepository.getCarDistance(lng,lat,distanceValue)
+    }
 
     if (!carDetails) {
       return null;
     }
+    
+
+    // if(carDetails && lng!==0 && lat!==0){
+    //   let nearestLocation = await userRepository.getUsersLocation(lng,lat)
+    //   let userId = [] as any
+    //   nearestLocation?.map((user,index)=>{
+    //     userId.push(user._id)
+    //   })
+
+      
+      
+    //   carDetails = carDetails.filter((car) => userId.some((user:any) => user._id.toString() === car.userId._id.toString()));
+    //   // console.log('card',carDetails);
+      
+    // }
 
     if (transmission && transmission.length > 0) {
-      carDetails = carDetails.filter((car) =>
+        carDetails = carDetails.filter((car) =>
         transmission.includes(car.transmission))
     }
 

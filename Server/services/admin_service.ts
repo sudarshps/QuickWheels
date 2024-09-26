@@ -98,9 +98,7 @@ class AdminService {
         let isVerified = false
         if(status==='Verified'){
             isVerified = true
-        }
-        console.log('again',isVerified);
-        
+        }        
         const response = await adminRepository.verifyHost(status,id,isVerified)
         
         if(response === 'Verified'){

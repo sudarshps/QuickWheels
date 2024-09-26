@@ -119,6 +119,7 @@ const Navbar: React.FC<NavbarProps> = ({className}) => {
     try {
       await axios.post("http://localhost:3000/logout").then((res) => {
         if (res.data.status) {
+          sessionStorage.removeItem('userlocation')
           dispatch(logOut(null));
         }
       });

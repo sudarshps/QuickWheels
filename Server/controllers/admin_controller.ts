@@ -92,7 +92,6 @@ class AdminController {
     async verifyHost(req:Request,res:Response):Promise<void> {
         try {
             const{hostStatus,id} = req.body
-            console.log('ethi',id);
             
             const response = await AdminService.verifyHost(hostStatus,id)
             res.json(response)

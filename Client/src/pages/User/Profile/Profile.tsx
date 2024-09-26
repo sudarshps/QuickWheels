@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import Navbar from "../../../components/User/Navbar/Navbar";
 import "./Profile.css";
 import DatePicker from "react-datepicker";
@@ -19,6 +19,18 @@ import { useDispatch } from "react-redux";
 import { setCredentials } from "../../../slices/authSlice";
 import { debounce } from "lodash";
 
+
+interface Suggestion {
+    address_line1: string;
+    address_line2?: string; 
+    lon:number;
+    lat:number;
+}
+
+interface SuggestionsResponse {
+  results: Suggestion[];
+}
+
 const Profile: React.FC = () => {
   const [name, setName] = useState<string | null>("");
   const [dob, setDob] = useState<Date | null>(null);
@@ -31,9 +43,14 @@ const Profile: React.FC = () => {
   const [previewBack, setPreviewBack] = useState<string | null>(null);
   const [drivingFront, setDrivingFront] = useState<File | null>(null);
   const [drivingBack, setDrivingBack] = useState<File | null>(null);
+  const [longitude,setLongitude] = useState<number | null>(null)
+  const [latitude,setLatitude] = useState<number | null>(null)
+
 
   const [onEdit, setOnEdit] = useState<boolean>(false);
-
+  const [suggestions, setSuggestions] = useState<SuggestionsResponse>();
+  const [hideAddressList, setHideAddressList] = useState(false);
+    
   const navigate = useNavigate();
 
   const userName = useSelector((state: RootState) => state.auth.user);
@@ -77,6 +94,33 @@ const Profile: React.FC = () => {
 
     setDrivingIdExp(date);
   };
+
+  const handleAddress = (e:React.ChangeEvent<HTMLInputElement>) => {
+    const address = e.target.value
+    setAddress(address)
+    addressAutoComplete(address)
+    
+  }
+
+  const handleAddressSelection = (address:string,lon:number,lat:number) => {
+    setAddress(address)
+    setLongitude(lon)
+    setLatitude(lat)
+    setHideAddressList(false)
+  }
+
+
+  const addressAutoComplete = useCallback(
+    debounce((address:string)=>{
+      fetch(`https://api.geoapify.com/v1/geocode/autocomplete?text=${address}&format=json&apiKey=${import.meta.env.VITE_LOCATION_API}`)
+  .then(response => response.json())
+  .then(result => {
+    setHideAddressList(true)
+    setSuggestions(result)
+    console.log(result);
+  })
+  .catch(error => console.log('error', error));
+    },2000),[])
 
   const handleDob = (date: Date | null) => {
     if (!date) return;
@@ -206,6 +250,8 @@ const Profile: React.FC = () => {
       dob: dob.toISOString().split("T")[0],
       phone,
       address,
+      longitude,
+      latitude,
       drivingID: drivingId,
       drivingExpDate: drivingIdExp.toISOString().split("T")[0],
       drivingIDFront: drivingFront,
@@ -335,8 +381,19 @@ const Profile: React.FC = () => {
                   placeholder={"Address"}
                   disabled={profileUpdated && !onEdit ? true : false}
                   value={profileUpdated ? userAddress : address}
-                  onChange={(e) => setAddress(e.target.value)}
+                  onChange={handleAddress}
                 ></textarea>
+
+        {hideAddressList && suggestions?.results && suggestions.results.length > 0 && (
+        <ul className="border border-gray-300 mt-1 rounded bg-white">
+          {suggestions.results.map((suggestion, index) => (
+            <li key={index} className="p-2 hover:bg-gray-200 cursor-pointer" onClick={()=>handleAddressSelection(`${suggestion.address_line1} ${suggestion.address_line2}`,suggestion.lon,suggestion.lat)}>
+              {suggestion.address_line1} <span className="text-gray-500">{suggestion.address_line2}</span>
+    
+            </li>
+          ))}
+        </ul>
+      )}
               </div>
 
               <div className="mt-8">

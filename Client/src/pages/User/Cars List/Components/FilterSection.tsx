@@ -1,11 +1,12 @@
 import React, { useState } from "react";
-
+import { TooltipDemo } from "./Tooltip";
 interface FilterSectionProps {
   onSortChange: (
     sort: string,
     transmission: string[],
     fuel: string[],
-    seat: string[]
+    seat: string[],
+    distance:number[]
   ) => void;
 }
 
@@ -14,6 +15,8 @@ const FilterSection: React.FC<FilterSectionProps> = ({ onSortChange }) => {
   const [fuel, setFuel] = useState<string[]>([]);
   const [seat, setSeat] = useState<string[]>([]);
   const [sort, setSort] = useState("Relevance");
+  const [distance,setDistance] = useState([0])
+  
 
   const handleTransmission = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = e.target;
@@ -50,6 +53,12 @@ const FilterSection: React.FC<FilterSectionProps> = ({ onSortChange }) => {
     setSort(selectedSort);
   };
 
+  const handleDistanceChange = (value:number[]) =>{
+    setDistance(value)
+  }
+
+
+
   return (
     <>
       <aside className="w-full md:w-1/4 pr-8">
@@ -70,6 +79,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({ onSortChange }) => {
                 <option>Popularity</option>
               </select>
             </div>
+          </div>
+          <div>
+            <h3 className="font-semibold mb-2">Distance</h3>
+            <TooltipDemo onDistanceChange={handleDistanceChange}/>
           </div>
           <div>
             <h3 className="font-semibold mb-2">Delivery Type</h3>
@@ -134,7 +147,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ onSortChange }) => {
           <div>
             <button
               className="bg-red-500 text-white px-20 py-2 rounded-md hover:bg-red-600 transition-colors duration-100 whitespace-nowrap"
-              onClick={() => onSortChange(sort, transmission, fuel, seat)}
+              onClick={() => onSortChange(sort, transmission, fuel, seat, distance)}
             >
               Apply Filters
             </button>

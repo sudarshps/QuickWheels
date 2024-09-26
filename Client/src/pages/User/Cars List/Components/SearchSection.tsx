@@ -7,8 +7,27 @@ const SearchSection:React.FC = () => {
     const[searchValue,setSearchValue] = useState('')
 
     const handleSearch = () => {
-        
+
     }
+
+    const getUserLocation = () => {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+  
+            sessionStorage.setItem('userlocation',JSON.stringify({lng,lat}))
+            console.log(`Latitude: ${lat}, longitude: ${lng}`);
+          },
+          (error) => {
+            console.error("Error getting user location:", error);
+          }
+        );
+      } else {
+        console.error("Geolocation is not supported by this browser.");
+      }
+    };
 
 
   return (
@@ -20,8 +39,13 @@ const SearchSection:React.FC = () => {
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-red-500"
               icon={faLocationArrow}
             />
-            <select className="w-1/2 pl-10 pr-4 py-2 border border-red-300 rounded-md focus:ring-1 focus:ring-red-500">
-              <option>Current Location</option>
+            <select className="w-1/2 pl-10 pr-4 py-2 border border-red-300 rounded-md focus:ring-1 focus:ring-red-500" onChange={(e) => {
+                  if (e.target.value === "current location") {
+                    getUserLocation();
+                  }
+                }}>
+              <option>Choose Location</option>
+              <option value='current location'>Current Location</option>
             </select>
           </div>
           <div className="relative flex-grow">

@@ -14,6 +14,7 @@ interface CarDetailsType {
   fuel: string;
   seatCapacity: string;
   rentAmount: string;
+  distance:number
 }
 
 const CarsList: React.FC = () => { 
@@ -21,27 +22,38 @@ const CarsList: React.FC = () => {
   const[sort,setSort] = useState('')
   const[transmission,setTransmission] = useState<string[]>([])
   const[fuel,setFuel] = useState<string[]>([])
-  const[seat,setSeat] = useState<string[]>([])
+  const[seat,setSeat] = useState<string[]>([]) 
+  const[distance,setDistance] = useState<string[]>(['0']) 
   const [carListings, setCarListings] = useState<CarDetailsType[]>([]);
   
-  const handleSortChange = (sort:string,transmission:string[],fuel:string[],seat:string[]) => {    
+  const handleSortChange = (sort:string,transmission:string[],fuel:string[],seat:string[],distance:string[]) => {    
       setSort(sort)
       setTransmission(transmission)
       setFuel(fuel)
       setSeat(seat)
+      setDistance(distance)
   }
 
   useEffect(() => {
+    let lng = 0
+    let lat = 0
+    if(sessionStorage.getItem('userlocation')){
+      const coordinates = JSON.parse(sessionStorage.getItem('userlocation'))
+      lng = coordinates.lng
+      lat = coordinates.lat  
+    }
     axios
       .get("http://localhost:3000/getrentcardetails", {
         params:{
-          sort,transmission,fuel,seat
+          sort,transmission,fuel,seat,distance,lng,lat
         }
       })
       .then((res) => {
         setCarListings(res.data);
       });
-  }, [sort,transmission,fuel,seat]);
+  }, [sort,transmission,fuel,seat,distance]);
+
+  
 
   
 

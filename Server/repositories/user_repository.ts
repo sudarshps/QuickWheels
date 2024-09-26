@@ -1,7 +1,18 @@
 import User,{IUser} from '../models/user_model'
 import CarModel,{ICar} from '../models/car_model'
-import { ObjectId } from 'mongoose';
 
+
+interface UserAddress {
+    address:string,
+    location:{
+        type:string,
+        coordinates:[number,number]
+    }
+}
+
+interface ICarWithAddress extends ICar{
+    userAddress:UserAddress;
+}
 
 class UserRepository {
 
@@ -19,9 +30,9 @@ class UserRepository {
         return await User.findOne({email:userData.email})
     }
 
-    async updateUserProfile(userData:Partial<IUser>):Promise<IUser | null>{
+    async updateUserProfile(userData:Partial<IUser>,longitude:number,latitude:number):Promise<IUser | null>{
         const email = userData.email
-        return await User.findOneAndUpdate({email},userData)
+        return await User.findOneAndUpdate({email},{$set:{...userData,'location':{type:'Point',coordinates:[longitude,latitude]}}})
     }
 
     async carDetails(email:string,carData:object,isVerified:boolean,status:string):Promise<ICar | null>{
@@ -33,6 +44,8 @@ class UserRepository {
                 const newCar = new CarModel({
                     ...carData,
                     userId:user._id,
+                    address:user.address,
+                    location:user.location,
                     isVerified,
                     status
                 })
@@ -77,8 +90,8 @@ class UserRepository {
         }
     }
 
-    async getRentCarDetails():Promise<ICar[] | null> {
-        return await CarModel.find()
+    async getRentCarDetails():Promise<ICarWithAddress[] | null> {
+        return await CarModel.find({isVerified:1})
     }
 
     async userCarDetails(id:string):Promise<ICar | null> {
@@ -88,6 +101,22 @@ class UserRepository {
     async getUserDetails(id:string):Promise<IUser | null> {
         return await User.findById(id)
     }
+
+    async getCarDistance(lng:number,lat:number,distanceValue:number):Promise<ICarWithAddress[] | null>{
+    const geoNearStage:any = {
+        $geoNear:{
+            near:{type:"Point",coordinates:[lng,lat]},
+            distanceField:"distance",
+            spherical:true
+        }
+    }
+
+    if(distanceValue!==0){
+        geoNearStage.$geoNear.maxDistance = distanceValue*1000
+    }
+
+    return await CarModel.aggregate([geoNearStage])
+}
  
 }
 
