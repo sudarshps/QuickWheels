@@ -1,13 +1,14 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLocationArrow,faSearch,faCalendar } from "@fortawesome/free-solid-svg-icons";
+import { faLocationArrow,faSearch } from "@fortawesome/free-solid-svg-icons";
 
 const SearchSection:React.FC = () => {
 
     const[searchValue,setSearchValue] = useState('')
+    const[userLocation,setUserLocation] = useState('')
 
     const handleSearch = () => {
-
+        
     }
 
     const getUserLocation = () => {
@@ -29,6 +30,25 @@ const SearchSection:React.FC = () => {
       }
     };
 
+    const handleLocation = (location:string) => {
+      setUserLocation(location)
+    }
+
+    useEffect(()=>{
+      if(sessionStorage.getItem('userlocation')){
+        const {lng,lat} = JSON.parse(sessionStorage.getItem('userlocation'))
+        fetch(`https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lng}&apiKey=${import.meta.env.VITE_LOCATION_API}`)
+        .then(response => response.json())
+        .then(result => {
+          if (result.features.length) {
+              handleLocation(result.features[0].properties.formatted)
+          } else {
+            console.log("No address found");
+          }
+        });      
+      }
+    },[])
+
 
   return (
     <>
@@ -39,12 +59,12 @@ const SearchSection:React.FC = () => {
               className="absolute left-3 top-1/2 transform -translate-y-1/2 text-red-500"
               icon={faLocationArrow}
             />
-            <select className="w-1/2 pl-10 pr-4 py-2 border border-red-300 rounded-md focus:ring-1 focus:ring-red-500" onChange={(e) => {
+            <select className="w-1/2 pl-10 pr-4 py-2 border border-red-300 rounded-md focus:ring-1 focus:ring-red-500 truncate" onChange={(e) => {
                   if (e.target.value === "current location") {
                     getUserLocation();
                   }
                 }}>
-              <option>Choose Location</option>
+              <option>{userLocation}</option>
               <option value='current location'>Current Location</option>
             </select>
           </div>
