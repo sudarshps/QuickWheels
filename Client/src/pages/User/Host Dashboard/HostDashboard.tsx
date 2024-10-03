@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "./Components/Sidebar";
 import Navbar from "../../../components/User/Navbar/Navbar";
-import axios from "axios";
+import axiosInstance from "../../../api/axiosInstance";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Tooltip } from "../../../components/Tooltip/Tooltip";
 import {
   faClock,
   faCircleCheck,
@@ -19,14 +20,15 @@ const HostDashboard: React.FC = () => {
   const [insuranceExp, setInsuranceExp] = useState("");
   const [images, setImages] = useState("");
   const [status, setStatus] = useState("");
+  const [note,setNote] = useState("");
 
   const navigate = useNavigate();
 
   useEffect(() => {
     if (email) {
       try {
-        axios
-          .get("http://localhost:3000/getcardetails", {
+        axiosInstance
+          .get("/getcardetails", {
             params: { email },
           })
           .then((res) => {
@@ -36,6 +38,7 @@ const HostDashboard: React.FC = () => {
               setInsuranceExp(res.data.insuranceExp);
               setImages(res.data.images[0]);
               setStatus(res.data.status);
+              setNote(res.data.note)
             }
           });
       } catch (error) {
@@ -57,22 +60,21 @@ const HostDashboard: React.FC = () => {
                 <span className="absolute top-2 right-2 text-gray-700 px-2 py-1 rounded">
                   {status === "Verification Pending" ? (
                     <div className="text-gray-500">
-                     <FontAwesomeIcon icon={faClock}/>
-                     {status}
-                     </div>
-                   
+                      <FontAwesomeIcon icon={faClock} />
+                      {status}
+                    </div>
                   ) : status === "Verified" ? (
                     <div className="text-green-500">
-                      <FontAwesomeIcon icon={faCircleCheck}/>
+                      <FontAwesomeIcon icon={faCircleCheck} />
                       {status}
                     </div>
                   ) : (
-                    <div className="text-red-500">
-                     <FontAwesomeIcon icon={faCircleXmark}/>
+                    <Tooltip content={note} elements={<div className="text-red-500">
+                      <FontAwesomeIcon icon={faCircleXmark} />
                       {status}
-                    </div>
+                    </div>}/>
                   )}
-                  
+
                 </span>
 
                 <div className="flex">

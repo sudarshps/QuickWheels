@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../../api/axiosInstance";
 import Navbar from "../../../components/User/Navbar/Navbar";
 import LoginImage from "../../../assets/carlogin.jpg";
 import GoogleLogo from "../../../assets/icons8-google.svg";
@@ -7,13 +7,11 @@ import FbLogo from "../../../assets/icons8-facebook.svg";
 import Modal from "../../../components/User/Login Modal/loginModal";
 import { useNavigate } from "react-router-dom";
 import { AppDispatch } from "../../../redux/store";
-import { setAuthorization, setCredentials } from "../../../slices/authSlice";
-import { useDispatch, useSelector } from "react-redux";
+import { setAuthorization } from "../../../slices/authSlice";
+import { useDispatch } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye } from "@fortawesome/free-solid-svg-icons";
-import { setUserDetails } from "../../../slices/userDetailSlice";
 
-// import { useLoginMutation } from "../../../slices/userApiSlice";
 
 const Login: React.FC = () => {
   const [openModal, setOpenModal] = useState(false);
@@ -26,12 +24,11 @@ const Login: React.FC = () => {
   const [loginError, setLoginError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // const [loginin,{isLoading}] = useLoginMutation()
 
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
 
-  axios.defaults.withCredentials = true;
+  axiosInstance.defaults.withCredentials = true;
 
   const checkEmail = async () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -52,8 +49,8 @@ const Login: React.FC = () => {
     const requestData: CheckEmailRequest = { email };
 
     try {
-      const response = await axios.post<CheckEmailResponse>(
-        "http://localhost:3000/checkMail",
+      const response = await axiosInstance.post<CheckEmailResponse>(
+        "/checkMail",
         requestData
       );
 
@@ -105,8 +102,8 @@ const Login: React.FC = () => {
     }
 
     try {
-      const response = await axios.post<otpResponse>(
-        "http://localhost:3000/sentOtp",
+      const response = await axiosInstance.post<otpResponse>(
+        "/sentOtp",
         requestData
       );
 
@@ -114,7 +111,7 @@ const Login: React.FC = () => {
         setOpenModal(true);
       }
     } catch (error) {
-      console.error("error in request otp");
+      console.error("error in request otp",error);
     }
   };
 
@@ -132,14 +129,14 @@ const Login: React.FC = () => {
     }
 
     try {
-      const response = await axios.post<otpResponse>(
-        "http://localhost:3000/verifyOtp",
+      const response = await axiosInstance.post<otpResponse>(
+        "/verifyOtp",
         { otp, emailToVerify: email }
       );
 
       if (response.data.validOtp) {
-        const userRegistration = await axios.post<userResponse>(
-          "http://localhost:3000/userRegister",
+        const userRegistration = await axiosInstance.post<userResponse>(
+          "/userRegister",
           { userName, password, email }
         );
 
@@ -154,7 +151,7 @@ const Login: React.FC = () => {
         setInvalidMsg("Invalid Otp!");
       }
     } catch (error) {
-      console.error("error in verifying otp");
+      console.error("error in verifying otp",error);
     }
   };
 
@@ -167,20 +164,23 @@ const Login: React.FC = () => {
       profileUpdated: boolean;
       isHost: boolean;
       status: string;
+      role:string[];
       message: string;
     }
 
     try {
-      const userResponse = await axios.post<response>(
-        "http://localhost:3000/userLogin",
+      const userResponse = await axiosInstance.post<response>(
+        "/userLogin",
         { email, password }
       );
 
       if (userResponse.data.validUser) {
         const profileUpdated = userResponse.data.profileUpdated;
         const isHost = userResponse.data.isHost;
+        const role = userResponse.data.role;
+        
         dispatch(
-          setAuthorization({ profileUpdated: profileUpdated, isHost: isHost })
+          setAuthorization({ profileUpdated: profileUpdated, isHost: isHost,role:role })
         );
         navigate("/");
       } else {
@@ -204,7 +204,6 @@ const Login: React.FC = () => {
         onResend={requestOtp}
         invalidMessage={invalidMsg}
       >
-        <></>
       </Modal>
       <Navbar />
       <div className={`main-div relative ${openModal ? "blur-sm" : ""}`}>

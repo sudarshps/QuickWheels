@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../../../components/Admin/Navbar/AdminNavbar";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axios from '../../../api/axios';
+import Dialog from "../../../components/Dialog/Dialog";
 
 const HostVerification: React.FC = () => {
   const location = useLocation();
@@ -11,7 +12,8 @@ const HostVerification: React.FC = () => {
   const navigate = useNavigate();
 
   interface HostDetails {
-    make: string;
+    carMake: object[];
+    carType:object[];
     carModel: string;
     transmission: string;
     seatCapacity: string;
@@ -20,46 +22,54 @@ const HostVerification: React.FC = () => {
     registerNumber: string;
     insuranceExp: string;
     phone: string;
-    RCDoc:string;
-    InsuranceDoc:string;
-    isVerified:boolean;
-    images:string;
+    RCDoc: string;
+    InsuranceDoc: string;
+    isVerified: boolean;
+    images: string;
   }
 
   const [hostDetails, setHostDetails] = useState<HostDetails | null>(null);
   const [frontIsEnlarged, setFrontIsEnlarged] = useState(false);
   const [backIsEnlarged, setBackIsEnlarged] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/admin/gethostdetails", {
+      .get("/gethostdetails", {
         params: {
           id: id,
         },
       })
-      .then((res) => {
-        setHostDetails(res.data)        
+      .then((res) => {        
+        setHostDetails(res.data);
       });
   }, [id]);
 
-  const handleProceed = (status: string) => {
-    let hostStatus = "Verified"
-    if(status==="reject"){
-      hostStatus = "Not Verified"
+  const handleProceed = (status: string, reasonNote: string) => {
+    let hostStatus = "Verified";
+    let note = "";
+    if (status === "reject") {
+      note = reasonNote;
+      hostStatus = "Not Verified";
     }
-    
-      axios
-        .post("http://localhost:3000/admin/verifyhost", { hostStatus, id })
-        .then((res) => {
-          if (res.data.statusUpdated) {
-            alert("status updated!");
-            navigate("/admin/userlist");
-          }else{
-            alert("status updated!");
-            navigate("/admin/userlist");
-          }
-        });
+
+    axios
+      .post("/verifyhost", { hostStatus, id, note })
+      .then((res) => {
+        if (res.data.statusUpdated) {
+          alert("status updated!");
+          navigate("/admin/userlist");
+        } else {
+          alert("status updated!");
+          navigate("/admin/userlist");
+        }
+      });
   };
+
+  const handleReason = (reason:string) => {
+    handleProceed('reject',reason)
+}
 
   return (
     <div className="min-h-screen bg-[#0A0C2D] px-4 md:px-8 lg:px-12">
@@ -86,17 +96,24 @@ const HostVerification: React.FC = () => {
             </div>
           </div> */}
 
-            <div className="grid grid-cols-1 md:grid-cols-2">
+          <div className="grid grid-cols-1 md:grid-cols-2">
             <div className="w-60 h-40 bg-gray-200 rounded flex justify-center items-center ml-28">
-                <img src={`http://localhost:3000/${hostDetails?.images[0]}`} alt="" />
-              </div>
-
-              <div className='flex flex-col ml-28 gap-4'>
-                <h1 className="text-white text-2xl font-bold">{hostDetails?.make}<span> {hostDetails?.carModel}</span></h1>
-                <h2 className="text-white text-lg ">{hostDetails?.registerNumber}</h2>
-              </div>
+              <img
+                src={`http://localhost:3000/${hostDetails?.images[0]}`}
+                alt=""
+              />
             </div>
-              
+
+            <div className="flex flex-col ml-28 gap-4">
+              <h1 className="text-white text-2xl font-bold">
+                {hostDetails?.carMake[0].name}
+                <span> {hostDetails?.carModel}</span>
+              </h1>
+              <h2 className="text-white text-lg ">
+                {hostDetails?.registerNumber}
+              </h2>
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="text-white ml-28">
@@ -112,17 +129,26 @@ const HostVerification: React.FC = () => {
 
               <label className="text-gray-300">Transmission:</label>
 
-              <h2 className="text-lg font-semibold mb-4">{hostDetails?.transmission}</h2>
+              <h2 className="text-lg font-semibold mb-4">
+                {hostDetails?.transmission}
+              </h2>
             </div>
             <div className="text-white ml-28">
               <label className="text-gray-300">Rent Amount:</label>
               <h2 className="text-lg font-semibold mb-4">
-                {hostDetails?.rentAmount}<span className="text-md font-normal text-gray-200">/hr</span>
+                {hostDetails?.rentAmount}
+                <span className="text-md font-normal text-gray-200">/hr</span>
               </h2>
               <label className="text-gray-300">Insurance Expiry:</label>
 
               <h2 className="text-lg font-semibold mb-4">
-               {hostDetails?.insuranceExp}
+                {hostDetails?.insuranceExp}
+              </h2>
+
+              <label className="text-gray-300">Car Type:</label>
+
+              <h2 className="text-lg font-semibold mb-4">
+                {hostDetails?.carType[0].name}
               </h2>
             </div>
           </div>
@@ -158,20 +184,30 @@ const HostVerification: React.FC = () => {
           <div className="flex justify-end gap-8 pe-16">
             <button
               className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
-              onClick={() => handleProceed("reject")}
+              // onClick={() => handleProceed("reject")}
+              onClick={() => setIsDialogOpen(true)}
             >
               Reject
             </button>
             <button
-              className={`bg-blue-500 ${!hostDetails?.isVerified?`hover:bg-blue-600`:``} text-white font-bold py-2 px-4 rounded`}
+              className={`bg-blue-500 ${
+                !hostDetails?.isVerified ? `hover:bg-blue-600` : ``
+              } text-white font-bold py-2 px-4 rounded`}
               onClick={() => handleProceed("approve")}
-              disabled={hostDetails?.isVerified?true:false}
+              disabled={hostDetails?.isVerified ? true : false}
             >
-              {hostDetails?.isVerified?`Approved`:`Approve`}
+              {hostDetails?.isVerified ? `Approved` : `Approve`}
             </button>
           </div>
         </div>
       </div>
+      {isDialogOpen ? (
+        <Dialog
+          dialogOpen={isDialogOpen}
+          dialogClose={() => setIsDialogOpen(false)}
+          reason={handleReason}
+        />
+      ) : undefined}
     </div>
   );
 };

@@ -1,11 +1,11 @@
-import {useState} from 'react'
+import {useState,useEffect} from 'react'
 import { useMultiStepForm } from "../../../custom hooks/useMultiStepForm";
 import CarDetails from './component/CarDetails';
 import CarDocuments from './component/CarDocuments';
 import Navbar from '../../../components/User/Navbar/Navbar';
 import { RootState } from '../../../redux/store';
 import './HostRegister.css'
-import axios from 'axios';
+import axiosInstance from '../../../api/axiosInstance';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -13,6 +13,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 interface FormData{
     make:string,
     carModel:string,
+    carType:string,
     transmission:string,
     fuel:string,
     seatCapacity:string,
@@ -28,6 +29,7 @@ interface FormData{
   const initialData:FormData = {
     make:"",
     carModel:"",
+    carType:"",
     transmission:"Manual",
     fuel:"Petrol",
     seatCapacity:"4-5 Seater",
@@ -58,8 +60,7 @@ const RegisterForm = () => {
         setData(prev => {
             return {...prev,...fields}
         })
-    }
-
+    }    
     const postData = {
       ...data,
       email:userEmail,
@@ -132,7 +133,7 @@ const RegisterForm = () => {
         try {
           
 
-          await axios.post('http://localhost:3000/hostregister',formData)
+          await axiosInstance.post('/hostregister',formData)
           .then(res=>{
             if(res.data.updatedCarDetails){
               alert('Registration completed!')

@@ -28,7 +28,10 @@ const Navbar: React.FC = () => {
         <Link to="#" className="hover:text-gray-400">
           Payments
         </Link>
-        <p to="#" className="hover:text-gray-400" onClick={()=>dispatch(logout(null))}>
+        <Link to="/admin/category" className="hover:text-gray-400">
+          Category
+        </Link>
+        <p className="hover:text-gray-400 cursor-pointer" onClick={()=>dispatch(logout(null))}>
           Log Out
         </p>
       </div>

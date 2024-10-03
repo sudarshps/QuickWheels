@@ -12,13 +12,14 @@ router.post('/userLogin',userController.userLogin)
 router.post('/userprofile',upload.fields([{name:'drivingIDFront',maxCount:1},{name:'drivingIDBack',maxCount:1}]),userController.userProfileCompletion)
 router.post('/logout',userController.userLogout)
 router.get('/authorized',verifyUser,userController.authorizedUser) 
-router.get('/userDetails',userController.userDetails)
+router.get('/userDetails',verifyUser,userController.userDetails)
 router.get('/getrentcardetails',userController.rentCarDetails)
 router.get('/cardetails',userController.userCarDetails)
 
-
+router.get('/getcarmake',userController.getCarMake)
+router.get('/getcartype',userController.getCarType)
 router.post('/hostregister',upload.fields([{name:'images',maxCount:5},{name:'RCDoc',maxCount:1},{name:'InsuranceDoc',maxCount:1}]),userController.hostCarDetails)
-router.get('/getcardetails',userController.carDetails)
+router.get('/getcardetails',verifyUser,userController.carDetails)
 
 
 export default router;

@@ -10,7 +10,8 @@ const CarDetailsSection:React.FC = () => {
   const id = queryParams.get('id')
 
   const[carImages,setCarImages] = useState<string[]>([])
-  const[make,setMake] = useState('')
+  const[make,setMake] = useState('') 
+  const[type,setType] = useState('') 
   const[model,setModel] = useState('')
   const[transmission,setTransmission] = useState('')
   const[fuel,setFuel] = useState('')
@@ -25,12 +26,13 @@ const CarDetailsSection:React.FC = () => {
     })
     .then(res=>{
       setCarImages(res.data.images)
-      setMake(res.data.make)
+      setMake(res.data.carMake[0].name)
+      setType(res.data.carType[0].name)
       setModel(res.data.carModel)
       setTransmission(res.data.transmission)
       setFuel(res.data.fuel)
       setSeat(res.data.seatCapacity)
-      setHostName(res.data.hostName)
+      setHostName(res.data.userDetails[0].name)
     })
   },[id])  
   
@@ -48,7 +50,7 @@ const CarDetailsSection:React.FC = () => {
 
             <h1 className="text-3xl font-bold mb-2">{make} <span>{model}</span></h1>
             <div className="flex items-center mb-4">
-              <span className="text-gray-600 mr-4">{transmission} · {fuel} · {seat}</span>
+              <span className="text-gray-600 mr-4">{transmission} · {fuel} · {seat} · {type}</span>
               
             </div>
 

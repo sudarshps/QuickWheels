@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-
+import axiosInstance from "../../../../api/axiosInstance";
 
 
 interface Feature {
@@ -10,6 +10,7 @@ interface Feature {
 
 type HostFormProps = {
   make:string,
+  carType:string,
   carModel:string,
   transmission:string,
   fuel:string,
@@ -23,13 +24,14 @@ type updatedProps = HostFormProps & {
 
 }
 
-const HostRegister: React.FC<updatedProps> = ({make,carModel,transmission,fuel,seatCapacity,rentAmount,features,updatedField}) => {
+const HostRegister: React.FC<updatedProps> = ({make,carModel,carType,transmission,fuel,seatCapacity,rentAmount,features,updatedField}) => {
   
   const[otherField,setOtherField] = useState(false)
   const[otherFeature,setOtherFeature] = useState('')
   const[tags,setTags] = useState<string[]>([])
   const[selectedFeatures, setSelectedFeatures] = useState<Feature[]>(features);
-
+  const[carMake,setCarMake] = useState([])
+  const[carTypeList,setCarTypeList] = useState([])
 
   const featureOptions: Feature[] = [
     { id: 1, name: "Air Conditioning" },
@@ -81,6 +83,20 @@ const HostRegister: React.FC<updatedProps> = ({make,carModel,transmission,fuel,s
     setSelectedFeatures(features)
   },[features])
 
+  useEffect(()=>{
+    axiosInstance.get('/getcarmake')
+    .then(res=>{
+      setCarMake(res.data)
+    })
+  },[])
+
+  useEffect(()=>{
+    axiosInstance.get('/getcartype')
+    .then(res=>{
+      setCarTypeList(res.data)
+    })
+  },[])
+
 
   const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = event.target;
@@ -114,14 +130,22 @@ const HostRegister: React.FC<updatedProps> = ({make,carModel,transmission,fuel,s
               >
                 Make<span className="text-red-500">*</span>
               </label>
-              <input
+              {/* <input
                 type="text"
                 id="carMake"
                 value={make}
                 onChange={e=>updatedField({make:e.target.value})}
                 className="w-full p-2 border rounded"
                 placeholder="Enter car make"
-              />
+              /> */}
+              <select className="w-full p-2 border rounded" value={make} onChange={e=>updatedField({make:e.target.value})}>
+              <option value="">Select Make</option>
+
+                {carMake.map((make,ind)=>(
+                  <option key={ind} value={make._id}>{make.name}</option>
+                )
+                )}
+              </select>
             </div>
             <div>
               <label
@@ -138,6 +162,25 @@ const HostRegister: React.FC<updatedProps> = ({make,carModel,transmission,fuel,s
                 className="w-full p-2 border rounded"
                 placeholder="Enter car model"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2" htmlFor="year">
+                Type<span className="text-red-500">*</span>
+              </label>
+              <select
+                id="options"
+                className="w-full p-2 border rounded"
+                value={carType}
+                onChange={e=>updatedField({carType:e.target.value})}
+                name="options"
+              >
+                <option value="">Select Type</option>
+                {carTypeList.map((type,ind)=>(
+                  <option key={ind} value={type._id}>{type.name}</option>
+                ))}
+                
+              </select>
             </div>
 
             <div>

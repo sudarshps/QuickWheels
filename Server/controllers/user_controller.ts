@@ -29,7 +29,8 @@ class UserController {
         isHost: false,
         profileUpdated:false,
         status:'Verification Pending',
-        approvedHost:false
+        approvedHost:false,
+        role:['USER']
       });
       res.json(createUser);
     } catch (error) {
@@ -231,15 +232,17 @@ class UserController {
   async rentCarDetails(req:Request,res:Response): Promise<void> {
     try {
       const sort = req.query.sort as string
+      const make = req.query.carMake as string
       const transmission = req.query.transmission as string[] 
       const fuel = req.query.fuel as string[] 
       const seat = req.query.seat as string[] 
       const distance = req.query.distance as string[]
       const searchInput = req.query.userSearch as string
+      const carType = req.query.carType as string[]
       let lngQuery = req.query.lng
       let latQuery = req.query.lat    
       let distanceValue = 0
-  
+      
       if(distance){
         distanceValue = parseFloat(distance[0])
       }
@@ -260,7 +263,7 @@ class UserController {
       return;
     }
       
-      const carDetails = await UserService.rentCarDetails(sort,transmission,fuel,seat,lng,lat,distanceValue,searchInput)      
+      const carDetails = await UserService.rentCarDetails(sort,transmission,fuel,seat,lng,lat,distanceValue,searchInput,carType,make)      
       res.json(carDetails)
     } catch (error) {
       console.error('error in fetching rent car details',error);
@@ -270,11 +273,31 @@ class UserController {
   async userCarDetails(req:Request,res:Response):Promise<void> {
     try {
       const {id} = req.query
-      const carDetails = await UserService.userCarDetails(id as string)   
+      const carDetails = await UserService.userCarDetails(id as string) 
       res.json(carDetails)
          
     } catch (error) {
       console.error('error in fetching user car details',error);
+      
+    }
+  }
+
+  async getCarMake(req:Request,res:Response):Promise<void> {
+    try {
+      const response = await UserService.getCarMake()
+      res.json(response)
+    } catch (error) {
+      console.error('error in getting car make list',error);
+      
+    }
+  }
+
+  async getCarType(req:Request,res:Response):Promise<void> {
+    try {
+      const response = await UserService.getCarType()
+      res.json(response)
+    } catch (error) {
+      console.error('error in getting car make list',error);
       
     }
   }

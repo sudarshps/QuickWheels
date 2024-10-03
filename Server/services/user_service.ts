@@ -4,6 +4,8 @@ import { ObjectId } from "mongodb";
 import bcrypt from "bcrypt";
 import { signAccessToken, signRefreshToken } from "../utils/jwt_utils";
 import { ICar } from "../models/car_model";
+import { ICarMakeCategory } from "../models/carmake-category_model";
+import { ICarTypeCategory } from "../models/cartype-category_model";
 
 interface EmailValidate {
   emailExists: boolean;
@@ -39,6 +41,7 @@ interface CarDetails {
   insuranceExp?: string;
   images?: string[];
   status?: string;
+  note?: string;
   message: string;
 }
 
@@ -51,6 +54,7 @@ interface userValidate {
   profileUpdated?: boolean;
   isHost?: boolean;
   status?: string;
+  role?: string[];
   message?: string;
 }
 
@@ -65,6 +69,8 @@ interface UserDetails {
   profileUpdated: boolean;
   isHost: boolean;
   status: string;
+  note: string;
+  role: string[];
   isVerified: boolean;
 }
 
@@ -154,6 +160,7 @@ class UserService {
           email: user.email,
           profileUpdated: user.profileUpdated,
           isHost: user.isHost,
+          role: user.role,
         });
         const refreshToken = signRefreshToken({
           id: user._id,
@@ -161,6 +168,7 @@ class UserService {
           email: user.email,
           profileUpdated: user.profileUpdated,
           isHost: user.isHost,
+          role: user.role,
         });
         return {
           validUser: true,
@@ -171,6 +179,7 @@ class UserService {
           profileUpdated: Boolean(user.profileUpdated),
           isHost: Boolean(user.isHost),
           status: user.status,
+          role: user.role,
           message: "User validation is successful",
         };
       }
@@ -197,6 +206,8 @@ class UserService {
         profileUpdated: Boolean(user.profileUpdated),
         isHost: Boolean(user.isHost),
         status: user.status,
+        role: user.role,
+        note: user.note,
         isVerified: Boolean(user.isVerified),
       };
     }
@@ -239,6 +250,7 @@ class UserService {
         insuranceExp: carDetails.insuranceExp,
         images: carDetails.images,
         status: carDetails.status,
+        note: carDetails.note,
         message: "Car Details Created",
       };
     }
@@ -257,46 +269,68 @@ class UserService {
     lng: number,
     lat: number,
     distanceValue: number,
-    searchInput: string
+    searchInput: string,
+    carType: string[],
+    make:string
   ): Promise<ICar[] | null> {
     let carDetails = await userRepository.getRentCarDetails();
 
     if (carDetails && lng !== 0 && lat !== 0) {
       carDetails = await userRepository.getCarDistance(lng, lat, distanceValue);
+    }
 
-      if (carDetails && searchInput.trim()) {
-        const regex = new RegExp(searchInput, "i");
-        carDetails = carDetails?.filter(
-          (car) =>
-            regex.test(car.make) ||
-            regex.test(car.carModel) ||
-            regex.test(car.transmission) ||
-            regex.test(car.seatCapacity) ||
-            regex.test(car.fuel)
+    if (carDetails && searchInput.trim()) {
+      const regex = new RegExp(searchInput, "i");
+      carDetails = carDetails?.filter((car) => {
+        const carTypeName =
+          typeof car.carType === "object" && "name" in car.carType
+            ? car.carType.name
+            : ""; 
+        const carMakeName = 
+          typeof car.make === 'object' && 'name' in car.make 
+            ? car.make.name
+            : "";    
+                         
+        return (
+          regex.test(carMakeName) ||
+          regex.test(carTypeName) ||
+          regex.test(car.carModel) ||
+          regex.test(car.transmission) ||
+          regex.test(car.seatCapacity) ||
+          regex.test(car.fuel)
         );
-      }
+      });
     }
 
     if (!carDetails) {
       return null;
     }
-
-    // if(carDetails && lng!==0 && lat!==0){
-    //   let nearestLocation = await userRepository.getUsersLocation(lng,lat)
-    //   let userId = [] as any
-    //   nearestLocation?.map((user,index)=>{
-    //     userId.push(user._id)
-    //   })
-
-    //   carDetails = carDetails.filter((car) => userId.some((user:any) => user._id.toString() === car.userId._id.toString()));
-    //   // console.log('card',carDetails);
-
-    // }
+    if(make){
+      carDetails = carDetails.filter((car) => {
+        const carMakeName = 
+        typeof car.make === 'object' && 'name' in car.make 
+          ? car.make.name
+          : ""; 
+          return carMakeName === make
+      }
+      )
+    }
 
     if (transmission && transmission.length > 0) {
       carDetails = carDetails.filter((car) =>
         transmission.includes(car.transmission)
       );
+    }
+
+    if(carType && carType.length > 0) {
+
+      carDetails = carDetails.filter((car) =>{
+        const carTypeName =
+        typeof car.carType === "object" && "name" in car.carType
+          ? car.carType.name
+          : "";           
+        return carType.includes(carTypeName)
+      })
     }
 
     if (fuel && fuel.length > 0) {
@@ -317,6 +351,8 @@ class UserService {
       );
     }
 
+    carDetails = carDetails.filter((car) => car.isVerified === true);
+
     return carDetails;
   }
 
@@ -325,18 +361,25 @@ class UserService {
       id
     )) as ICarWithHostName;
 
-    if (response) {
-      const id = response.userId.toString();
-      const hostDetails = await userRepository.getUserDetails(id);
-      const obj = response.toObject();
-      const result: ICarWithHostName = {
-        ...obj,
-        hostName: hostDetails?.name,
-      };
+    // if (response) {
+    //   const id = response.userId.toString();
+    //   const hostDetails = await userRepository.getUserDetails(id);
+    //   const obj = response.toObject();
+    //   const result: ICarWithHostName = {
+    //     ...obj,
+    //     hostName: hostDetails?.name,
+    //   };
 
-      return result;
-    }
+    //   return result;
+    // }
     return response;
+  }
+
+  async getCarMake(): Promise<ICarMakeCategory[]> {
+    return await userRepository.getCarMake();
+  }
+  async getCarType(): Promise<ICarTypeCategory[]> {
+    return await userRepository.getCarType();
   }
 }
 

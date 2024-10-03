@@ -4,7 +4,7 @@ import Navbar from '../../../components/User/Navbar/Navbar'
 import './HostStartup.css'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../redux/store'
-import axios from 'axios'
+import axiosInstance from '../../../api/axiosInstance'
 
 
 const HostStartup:React.FC = () => {
@@ -22,8 +22,8 @@ const HostStartup:React.FC = () => {
       // if (profileUpdated) {
         if (userEmail) {
           try {
-            await axios
-              .get("http://localhost:3000/userDetails", {
+            await axiosInstance
+              .get("/userDetails", {
                 params: {
                   email: userEmail,
                 },

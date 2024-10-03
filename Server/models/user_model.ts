@@ -24,6 +24,8 @@ export interface IUser extends Document {
   profileUpdated: Boolean;
   profileImage: string;
   status: string;
+  note:string,
+  role:string[],
   approvedHost: Boolean;
 }
 
@@ -53,6 +55,8 @@ const userSchema: Schema<IUser> = new Schema(
     profileUpdated: { type: Boolean },
     profileImage: { type: String },
     status: { type: String },
+    note: {type:String},
+    role:{type:[String]},
     approvedHost: { type: Boolean },
   },
   { timestamps: true }

@@ -3,7 +3,7 @@ import Navbar from "../../../components/User/Navbar/Navbar";
 import FilterSection from "./Components/FilterSection";
 import CarListSection from "./Components/CarListSection";
 import SearchSection from "./Components/SearchSection";
-import axios from "axios";
+import axiosInstance from "../../../api/axiosInstance";
 
 
 interface CarDetailsType {
@@ -26,16 +26,20 @@ const CarsList: React.FC = () => {
   const[distance,setDistance] = useState<string[]>(['0']) 
   const [carListings, setCarListings] = useState<CarDetailsType[]>([]);
   const [searchValue,setSearchValue] = useState('')
+  const [carType,setCarType] = useState<string[]>([])
+  const [carMake,setCarMake] = useState('')
 
   const[userSearch,setUserSearch] = useState('')
   
-  const handleSortChange = (sort:string,transmission:string[],fuel:string[],seat:string[],distance:string[],search:string) => {    
+  const handleSortChange = (sort:string,transmission:string[],fuel:string[],seat:string[],distance:string[],search:string,carType:string[],carMake:string) => {    
       setSort(sort)
       setTransmission(transmission)
       setFuel(fuel)
       setSeat(seat)
       setDistance(distance)
       setUserSearch(search)
+      setCarType(carType)
+      setCarMake(carMake)
   }
   
 
@@ -43,7 +47,6 @@ const CarsList: React.FC = () => {
     setSearchValue(input)
   }
   
-
   useEffect(() => {
     let lng = 0
     let lat = 0
@@ -52,16 +55,17 @@ const CarsList: React.FC = () => {
       lng = coordinates.lng
       lat = coordinates.lat  
     }
-    axios
-      .get("http://localhost:3000/getrentcardetails", {
+    
+    axiosInstance
+      .get("/getrentcardetails", {
         params:{
-          sort,transmission,fuel,seat,distance,userSearch,lng,lat
+          sort,transmission,fuel,seat,distance,userSearch,lng,lat,carType,carMake
         }
       })
       .then((res) => {
         setCarListings(res.data);
       });
-  }, [sort,transmission,fuel,seat,distance,userSearch]);
+  }, [sort,transmission,fuel,seat,distance,userSearch,carType,carMake]);
 
   
 

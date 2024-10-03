@@ -1,6 +1,6 @@
 import React, { useState,useEffect } from 'react'
 import Navbar from '../../../components/Admin/Navbar/AdminNavbar'
-import axios from 'axios';
+import axios from '../../../api/axios';
 import { useNavigate } from 'react-router-dom';
 
 
@@ -22,7 +22,7 @@ const HostList:React.FC = () => {
   useEffect(() => {
     const fetchUsers = async() => {
         try {
-            const response = await axios.get('http://localhost:3000/admin/gethostlist')
+            const response = await axios.get('/gethostlist')
             if(response.data){   
                 const updatedProfile = response.data
                 setHosts(updatedProfile)

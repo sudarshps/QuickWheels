@@ -1,5 +1,7 @@
 import { ObjectId } from 'mongodb'
 import mongoose,{Document,Schema} from 'mongoose'
+import { ICarMakeCategory } from './carmake-category_model';
+import { ICarTypeCategory } from './cartype-category_model';
 
 interface ILocation {
     type: "Point";
@@ -10,8 +12,9 @@ interface ILocation {
 export interface ICar extends Document{
     _id:ObjectId
     userId:ObjectId,
-    make:string,
+    make:ObjectId | ICarMakeCategory,
     carModel:string,
+    carType:ObjectId | ICarTypeCategory,
     transmission:string,
     seatCapacity:string,
     rentAmount:string,
@@ -25,14 +28,16 @@ export interface ICar extends Document{
     address:string,
     isVerified:boolean,
     status:string,
+    note:string,
     images:[string]
 }
 
 
 const carSchema:Schema<ICar> = new Schema({
-    userId:{type:Schema.Types.ObjectId,ref:'User',requires:true},
-    make:{type:String,required:true},
+    userId:{type:Schema.Types.ObjectId,ref:'User',required:true},
+    make:{type:Schema.Types.ObjectId,ref:'CarMake',required:true},
     carModel:{type:String,required:true},
+    carType:{type:Schema.Types.ObjectId,ref:'CarType',required:true},
     transmission:{type:String,required:true},
     seatCapacity:{type:String,required:true},
     rentAmount:{type:String,required:true},
@@ -54,6 +59,7 @@ const carSchema:Schema<ICar> = new Schema({
       address:{type:String},
     isVerified:{type:Boolean,required:true},
     status:{type:String,required:true},
+    note:{type:String},
     images:{type:[String],required:true}
 },{timestamps:true})
 

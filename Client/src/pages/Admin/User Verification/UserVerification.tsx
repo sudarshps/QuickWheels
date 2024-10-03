@@ -3,7 +3,8 @@ import Navbar from "../../../components/Admin/Navbar/AdminNavbar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
+import Dialog from "../../../components/Dialog/Dialog";
+import axios from '../../../api/axios';
 
 const UserVerification: React.FC = () => {
   const location = useLocation();
@@ -28,10 +29,11 @@ const UserVerification: React.FC = () => {
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const [frontIsEnlarged, setFrontIsEnlarged] = useState(false);
   const [backIsEnlarged, setBackIsEnlarged] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/admin/getuserdetails", {
+      .get("/getuserdetails", {
         params: {
           id: id,
         },
@@ -39,14 +41,16 @@ const UserVerification: React.FC = () => {
       .then((res) => setUserDetails(res.data));
   }, [id]);
 
-  const handleProceed = (status: string) => {
+  const handleProceed = (status: string, reasonNote:string) => {
     let userStatus = "Verified"
+    let note = ''
     if(status==="reject"){
+      note = reasonNote
       userStatus = "Not Verified"
     }
     
       axios
-        .post("http://localhost:3000/admin/verifyuser", { userStatus, id })
+        .post("/verifyuser", { userStatus, id,note })
         .then((res) => {
           if (res.data.statusUpdated) {
             alert("status updated!");
@@ -57,6 +61,10 @@ const UserVerification: React.FC = () => {
           }
         });
   };
+
+  const handleReason = (reason:string) => {
+    handleProceed('reject',reason)
+  }
 
   return (
     <div className="min-h-screen bg-[#0A0C2D] px-4 md:px-8 lg:px-12">
@@ -143,7 +151,7 @@ const UserVerification: React.FC = () => {
           <div className="flex justify-end gap-8 pe-16">
             <button
               className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded"
-              onClick={() => handleProceed("reject")}
+              onClick={() => setIsDialogOpen(true)}
             >
               Reject
             </button>
@@ -157,6 +165,13 @@ const UserVerification: React.FC = () => {
           </div>
         </div>
       </div>
+      {isDialogOpen ? (
+        <Dialog
+          dialogOpen={isDialogOpen}
+          dialogClose={() => setIsDialogOpen(false)}
+          reason={handleReason}
+        />
+      ) : undefined}
     </div>
   );
 };

@@ -13,11 +13,12 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
-import axios from "axios";
+import axiosInstance from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setCredentials } from "../../../slices/authSlice";
 import { debounce } from "lodash";
+import { Tooltip } from "../../../components/Tooltip/Tooltip";
 
 
 interface Suggestion {
@@ -77,6 +78,8 @@ const Profile: React.FC = () => {
   const drivingPhotoBack = useSelector(
     (state: RootState) => state.userDetails.drivingIDBack
   );
+
+  const note = useSelector((state:RootState) => state.userDetails.note)
 
   const dispatch = useDispatch();
 
@@ -267,8 +270,8 @@ const Profile: React.FC = () => {
     });
 
     try {
-      await axios
-        .post("http://localhost:3000/userprofile", formData)
+      await axiosInstance
+        .post("/userprofile", formData)
         .then((res) => {
           if (res.data.userUpdated) {
             const profileUpdated = res.data.profileUpdated;
@@ -321,7 +324,7 @@ const Profile: React.FC = () => {
                 </h2>
 
                 <div className="ml-auto">
-                  <span
+                  {/* <span
                     className={`text-sm font-semibold ${
                       status === "Not Verified"
                         ? `text-red-500`
@@ -340,7 +343,26 @@ const Profile: React.FC = () => {
                       }
                     />
                     {status}
-                  </span>
+                  </span> */}
+                  <span className="text-sm font-semibold">
+                  {status === "Verification Pending" ? (
+                    <div className="text-gray-500">
+                      <FontAwesomeIcon icon={faClock} />
+                      {status}
+                    </div>
+                  ) : status === "Verified" ? (
+                    <div className="text-green-500">
+                      <FontAwesomeIcon icon={faCircleCheck} />
+                      {status}
+                    </div>
+                  ) : (
+                    <Tooltip content={note} elements={<div className="text-red-500">
+                      <FontAwesomeIcon icon={faCircleXmark} />
+                      {status}
+                    </div>}/>
+                  )}
+
+                </span>
                 </div>
               </div>
 

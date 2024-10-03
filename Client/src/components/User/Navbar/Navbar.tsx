@@ -9,7 +9,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../../redux/store";
 import { logOut } from "../../../slices/authSlice";
 import { useDispatch } from "react-redux";
-import axios from "axios";
+import axiosInstance from "../../../api/axiosInstance";
 import { setCredentials } from "../../../slices/authSlice";
 import { setUserDetails } from "../../../slices/userDetailSlice";
 
@@ -67,11 +67,11 @@ const Navbar: React.FC<NavbarProps> = ({className}) => {
     navigate("/login");
   };
 
-  axios.defaults.withCredentials = true;
+  axiosInstance.defaults.withCredentials = true;
 
   useEffect(() => {
-    axios
-      .get("http://localhost:3000/authorized")
+    axiosInstance
+      .get("/authorized")
       .then((res) => {
         if (res.data.valid) {
           
@@ -79,7 +79,8 @@ const Navbar: React.FC<NavbarProps> = ({className}) => {
           const email = res.data.user.email;
           const profileUpdated = res.data.user.profileUpdated;
           const isHost = res.data.user.isHost;
-          dispatch(setCredentials({ userName, email, profileUpdated, isHost }));
+          const role = res.data.user.role;          
+          dispatch(setCredentials({ userName, email, profileUpdated, isHost,role }));
         } else {
           dispatch(logOut(null));
         }
@@ -90,7 +91,7 @@ const Navbar: React.FC<NavbarProps> = ({className}) => {
 
   useEffect(()=>{
     if(isAuthenticated){
-      axios.get('http://localhost:3000/userDetails',{
+      axiosInstance.get('/userDetails',{
         params:{
           email:email
         }
@@ -105,9 +106,11 @@ const Navbar: React.FC<NavbarProps> = ({className}) => {
         const drivingIDBack = res.data.drivingIDBack
         const profileUpdated = res.data.profileUpdated
         const isHost = res.data.isHost
-        const status = res.data.status        
+        const status = res.data.status
+        const note = res.data.note
+        const role = res.data.role        
           dispatch(setUserDetails({dob,phone,drivingExpDate,address,drivingID,
-            drivingIDFront,drivingIDBack,profileUpdated,isHost,status}))        
+            drivingIDFront,drivingIDBack,profileUpdated,isHost,status,note,role}))        
       })
     }
   },[isAuthenticated,dispatch,email])
@@ -117,7 +120,7 @@ const Navbar: React.FC<NavbarProps> = ({className}) => {
     
   const handleLogout = async () => {
     try {
-      await axios.post("http://localhost:3000/logout").then((res) => {
+      await axiosInstance.post("/logout").then((res) => {
         if (res.data.status) {
           sessionStorage.removeItem('userlocation')
           dispatch(logOut(null));

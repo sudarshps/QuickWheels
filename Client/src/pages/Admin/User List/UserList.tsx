@@ -1,44 +1,61 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../../../components/Admin/Navbar/AdminNavbar";
-import axios from "axios";
+import axios from "../../../api/axios";
 import { useNavigate } from "react-router-dom";
+import Pagination from "../../../components/Pagination/Pagination";
 
-
-interface User{
-   _id:string;
-    name:string;
-    email:string;
-    dob:string;
-    phone:string;
-    drivingExpDate:string;
-    address:string;
-    drivingID:string;
-    drivingIDFront:string;
-    drivingIDBack:string;
-    isVerified:boolean;
+interface User {
+  _id: string;
+  name: string;
+  email: string;
+  dob: string;
+  phone: string;
+  drivingExpDate: string;
+  address: string;
+  drivingID: string;
+  drivingIDFront: string;
+  drivingIDBack: string;
+  isVerified: boolean;
 }
 
 const UserList: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [users,setUsers] = useState<User[]>([])
+  const [users, setUsers] = useState<User[]>([]);
+  const [startIndex, setStartIndex] = useState(0);
+  const rowsPerPage = 5;
+  const [endIndex, setEndIndex] = useState(rowsPerPage);
 
-  const navigate = useNavigate()
+  const handlePrev = () => {
+    setStartIndex(startIndex - rowsPerPage);
+    setEndIndex(endIndex - rowsPerPage);
+  };
+
+  const handleNext = () => {
+    setStartIndex(startIndex + rowsPerPage);
+    setEndIndex(endIndex + rowsPerPage);
+  };
+
+  const navigate = useNavigate();  
 
   useEffect(() => {
-    const fetchUsers = async() => {
-        try {
-            const response = await axios.get('http://localhost:3000/admin/getuserlist')
-            if(response.data){   
-                const updatedProfile = response.data.filter(updated=>updated.profileUpdated===true)         
-                setUsers(updatedProfile)
-            }
-        } catch (error) {
-            console.error('error fetching user list',error)
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get(
+          "/getuserlist"
+        );
+        if (response.data) {
+          const updatedProfile = response.data.filter(
+            (updated) => updated.profileUpdated === true
+          );
+          setUsers(updatedProfile);
         }
-    }
+      } catch (error) {
+        console.error("error fetching user list", error);
+      }
+    };
 
-    fetchUsers()
-  },[]);
+    fetchUsers();
+  }, []);
 
   return (
     <>
@@ -59,39 +76,61 @@ const UserList: React.FC = () => {
             />
           </div>
 
-          {users.length>0?<div className="bg-gradient-to-br from-[#10114f] to-[#1416b5] rounded-xl shadow-lg overflow-x-auto">
-            <table className="min-w-full text-left text-white">
-              <thead>
-                <tr className="border-b border-white/10">
-                  <th className="py-3 px-2 md:px-4">No.</th>
-                  <th className="py-3 px-2 md:px-4">Name</th>
-                  <th className="py-3 px-2 md:px-4">Email</th>
-                  <th className="py-3 px-2 md:px-4">Phone</th>
-                  <th className="py-3 px-2 md:px-4">DOB</th>
-                  <th className="py-3 px-2 md:px-4">Status</th>
-                  <th className="py-3 px-2 md:px-4">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user,index)=>(
-                        <tr key={index} className="border-b border-white/10">
-                        <td className="py-3 px-2 md:px-4">{index+1}</td>
-                        <td className="py-3 px-2 md:px-4">{user.name}</td>
-                        <td className="py-3 px-2 md:px-4">{user.email}</td>
-                        <td className="py-3 px-2 md:px-4">{user.phone?user.phone:`N/A`}</td>
-                        <td className="py-3 px-2 md:px-4">{user.dob?user.dob:`N/A`}</td>
-                        <td className="py-3 px-2 md:px-4">{user.isVerified?`Verified`:`Not Verified`}</td>
-                        <td className="py-3 px-2 md:px-4 text-blue-300 hover:underline cursor-pointer" onClick={()=>navigate(`/admin/userverification?id=${user._id}`)}>
-                          View Details
-                        </td>
-                      </tr>
-                )
-
-                )}
-                
-              </tbody>
-            </table>
-          </div>:<div className="flex items-center justify-center"><p className="text-white">No Recored Found!</p></div>}
+          {users.length > 0 ? (
+            <div className="bg-gradient-to-br from-[#10114f] to-[#1416b5] rounded-xl shadow-lg overflow-x-auto">
+              <table className="min-w-full text-left text-white">
+                <thead>
+                  <tr className="border-b border-white/10">
+                    <th className="py-3 px-2 md:px-4">No.</th>
+                    <th className="py-3 px-2 md:px-4">Name</th>
+                    <th className="py-3 px-2 md:px-4">Email</th>
+                    <th className="py-3 px-2 md:px-4">Phone</th>
+                    <th className="py-3 px-2 md:px-4">DOB</th>
+                    <th className="py-3 px-2 md:px-4">Status</th>
+                    <th className="py-3 px-2 md:px-4">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.slice(startIndex, endIndex).map((user, index) => (
+                    <tr key={index} className="border-b border-white/10">
+                      <td className="py-3 px-2 md:px-4">{index + 1}</td>
+                      <td className="py-3 px-2 md:px-4">{user.name}</td>
+                      <td className="py-3 px-2 md:px-4">{user.email}</td>
+                      <td className="py-3 px-2 md:px-4">
+                        {user.phone ? user.phone : `N/A`}
+                      </td>
+                      <td className="py-3 px-2 md:px-4">
+                        {user.dob ? user.dob : `N/A`}
+                      </td>
+                      <td className="py-3 px-2 md:px-4">
+                        {user.isVerified ? `Verified` : `Not Verified`}
+                      </td>
+                      <td
+                        className="py-3 px-2 md:px-4 text-blue-300 hover:underline cursor-pointer"
+                        onClick={() =>
+                          navigate(`/admin/userverification?id=${user._id}`)
+                        }
+                      >
+                        View Details
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center">
+              <p className="text-white">No Recored Found!</p>
+            </div>
+          )}
+          <Pagination
+            dataLength={users.length}
+            startIndex={startIndex}
+            endIndex={endIndex}
+            prev={handlePrev}
+            next={handleNext}
+            textColor={"text-white mt-3"}
+          />
         </div>
       </div>
     </>

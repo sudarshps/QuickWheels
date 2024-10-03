@@ -13,35 +13,44 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import ProtectedRoute from './components/Protected Route/ProtectedRoute.tsx'
 import HostCarDetails from './pages/User/Host Car Details/HostCarDetails.tsx'
 import AdminProtectedRoute from './components/Protected Route/adminProtectedRoute.tsx'
-import Login2 from './pages/User/Login/Login2.tsx'
 import UserVerification from './pages/Admin/User Verification/UserVerification.tsx'
 import CarsList from './pages/User/Cars List/CarsList.tsx'
 import CarDetails from './pages/User/Car Details/CarDetails.tsx'
 import HostVerification from './pages/Admin/Host Verification/HostVerification.tsx'
+import ForbiddenPage from './pages/User/403/ForbiddenPage.tsx'
+import Category from './pages/Admin/Category/Category.tsx'
 
 import CarDetailsSection from './pages/User/Car Details/components/CarDetailsSection.tsx'
+
+import GuestRoute from './components/Guest Route/GuestRoute.tsx'
+
 
 function App() {
   return(
     <Router>
       <Routes>
-        <Route path='/' element={<Home/>}/>
-        <Route path='/login' element={<Login/>}/>
-        <Route path='/login2' element={<Login2/>}/>
-        <Route path='/availablecars' element={<CarsList/>}/>
-        <Route path='/cardetails' element={<CarDetails/>}/>
+        <Route path='/*' element={<Home/>}/>
+        <Route path='/admin/*' element={<AdminLogin/>}/>
+        <Route path='/login' element={
+          <GuestRoute>
+            <Login/>
+          </GuestRoute>
+        }/>
+        <Route path='/availablecars' element={<CarsList/>} />
+        <Route path='/cardetails' element={<CarDetails/>} />
+        <Route path='/unauthorized' element={<ForbiddenPage/>} />
         
-        
-        <Route path='/test' element={<CarDetailsSection/>}/>
 
-        <Route element={<ProtectedRoute/>}>
+        <Route element={<ProtectedRoute allowedRoles={['USER']}/>}>
         <Route path='/becomehost' element={<HostStartup/>}/>
         <Route path='/profile' element={<Profile/>}/>
         <Route path='/hostregister' element={<RegisterForm/>}/>
+        </Route>
+        <Route element={<ProtectedRoute allowedRoles={['HOST']}/>}>
         <Route path='/hostdashboard' element={<HostDashboard/>}/>
         <Route path='/editcardetails' element={<HostCarDetails/>}/>
         </Route>
-
+        
 
         <Route path='/admin' element={<AdminLogin/>}/>
         <Route element={<AdminProtectedRoute/>}>
@@ -50,6 +59,7 @@ function App() {
         <Route path='/admin/hostlist' element={<HostList/>}/>
         <Route path='/admin/userverification' element={<UserVerification/>}/>
         <Route path='/admin/hostverification' element={<HostVerification/>}/>
+        <Route path='/admin/category' element={<Category/>}/>
         </Route>     
       </Routes>
     </Router>

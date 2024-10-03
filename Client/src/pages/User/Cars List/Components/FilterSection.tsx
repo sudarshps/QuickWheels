@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { TooltipDemo } from "./Tooltip";
+import axiosInstance from "../../../../api/axiosInstance";
 interface FilterSectionProps {
   onSortChange: (
     sort: string,
@@ -7,6 +8,7 @@ interface FilterSectionProps {
     fuel: string[],
     seat: string[],
     distance:number[],
+    carType:string[],
     search:string
   ) => void;
   search:string
@@ -17,7 +19,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({ onSortChange,search }) =>
   const [fuel, setFuel] = useState<string[]>([]);
   const [seat, setSeat] = useState<string[]>([]);
   const [sort, setSort] = useState("Relevance");
+  const [carMake,setCarMake] = useState('')
   const [distance,setDistance] = useState([0])
+  const [type,setType] = useState([])
+  const [make,setMake] = useState([])
+  const [carType,setCarType] = useState<string[]>([])
 
     
   const handleTransmission = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,6 +56,17 @@ const FilterSection: React.FC<FilterSectionProps> = ({ onSortChange,search }) =>
     }
   };
 
+  const handleCarType = (e:React.ChangeEvent<HTMLInputElement>) => {
+    const { value, checked } = e.target;
+    
+    if (checked) {
+      setCarType([...carType, value]);
+    } else {
+      setCarType(carType.filter((item) => item !== value));
+    }
+  }
+  
+
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedSort = e.target.value;
     setSort(selectedSort);
@@ -57,11 +74,23 @@ const FilterSection: React.FC<FilterSectionProps> = ({ onSortChange,search }) =>
 
   const handleDistanceChange = (value:number[]) =>{
     setDistance(value)
-  }  
-
+  }
+  
   useEffect(() => {
-    onSortChange(sort, transmission, fuel, seat, distance, search);
+    onSortChange(sort, transmission, fuel, seat, distance, search, carType,carMake);
   }, [search]);
+
+  useEffect(()=> {
+    axiosInstance.get('/getcartype')
+    .then(res=>{
+      setType(res.data)
+    })
+
+    axiosInstance.get('/getcarmake')
+    .then(res=>{
+      setMake(res.data)
+    })
+  },[])
 
   return (
     <>
@@ -88,6 +117,21 @@ const FilterSection: React.FC<FilterSectionProps> = ({ onSortChange,search }) =>
           <div>
             <h3 className="font-semibold mb-2">Distance</h3>
             <TooltipDemo onDistanceChange={handleDistanceChange}/>
+          </div>
+
+          <div>
+            <h3 className="font-semibold mb-2">Car Make</h3>
+            <div className="flex items-center">
+              <select
+                onChange={e=>setCarMake(e.target.value)}
+                className="pl-3 pr-28 py-2 border border-red-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
+              >
+                <option>Select</option>
+                {make.map((make,ind)=>(
+                  <option key={ind} value={make.name}>{make.name}</option>
+                ))}
+              </select>
+            </div>
           </div>
           <div>
             <h3 className="font-semibold mb-2">Delivery Type</h3>
@@ -118,7 +162,22 @@ const FilterSection: React.FC<FilterSectionProps> = ({ onSortChange,search }) =>
           </div>
 
           <div>
-            <h4 className="text-sm text-gray-600 mb-1">Filter by Fuel Type</h4>
+            <h4 className="text-sm text-gray-600 mb-1">Filter by Car Type</h4>
+            {type.map((type,ind) => (
+              <label key={ind} className="flex items-center">
+                <input
+                  type="checkbox"
+                  value={type.name}
+                  onChange={handleCarType}
+                  className="form-checkbox text-red-500"
+                />
+                <span className="ml-2">{type.name}</span>
+              </label>
+            ))}
+          </div>
+
+          <div>
+          <h4 className="text-sm text-gray-600 mb-1">Filter by Fuel Type</h4>
             {["Petrol", "Diesel", "EV"].map((type) => (
               <label key={type} className="flex items-center">
                 <input
@@ -152,7 +211,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ onSortChange,search }) =>
           <div>
             <button
               className="bg-red-500 text-white px-20 py-2 rounded-md hover:bg-red-600 transition-colors duration-100 whitespace-nowrap"
-              onClick={() => onSortChange(sort, transmission, fuel, seat, distance,search)}
+              onClick={() => onSortChange(sort, transmission, fuel, seat, distance,search,carType,carMake)}
             >
               Apply Filters
             </button>
