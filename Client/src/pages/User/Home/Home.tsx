@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../../../components/User/Navbar/Navbar.tsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLocationArrow } from "@fortawesome/free-solid-svg-icons";
@@ -6,15 +6,28 @@ import "./Home.css";
 import { useNavigate } from "react-router-dom";
 import NavigationMenu from "./components/NavigationMenu.tsx";
 import LocationUI from "./components/LocationUI.tsx";
+import { DatePickerWithRange } from "../../../components/ui/daterangepicker.tsx";
+import { DateRange } from "react-day-picker";
 
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const[location,setLocation] = useState('')
+  const[date,setDate] = useState<DateRange | undefined>(undefined)
 
   const handleLocation = (data:string) => {
     setLocation(data)
   }
+
+  const handleDateChange = (date:DateRange | undefined) => {
+    setDate(date)
+  }
+  
+  useEffect(()=>{
+    if(date){
+      sessionStorage.setItem('date',JSON.stringify(date))
+    }
+  },[date])
 
   return (
     <>
@@ -53,7 +66,7 @@ const Home: React.FC = () => {
               
             </div>
 
-            <div className="flex items-center space-x-2 w-full md:w-auto mb-4 md:mb-0">
+            {/* <div className="flex items-center space-x-2 w-full md:w-auto mb-4 md:mb-0">
               <input
                 type="date"
                 className="border-none focus:ring-0 text-sm text-gray-600 cursor-pointer w-full md:w-auto"
@@ -67,7 +80,8 @@ const Home: React.FC = () => {
                 className="border-none focus:ring-0 text-sm text-gray-600 cursor-pointer appearance-none"
                 placeholder="Return Date"
               />
-            </div>
+            </div> */}
+            <DatePickerWithRange onDateChange={handleDateChange}/>
 
             <button
               className="bg-red-500 text-white text-sm px-2 py-2 rounded-lg hover:bg-red-600"

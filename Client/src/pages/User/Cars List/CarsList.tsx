@@ -4,7 +4,8 @@ import FilterSection from "./Components/FilterSection";
 import CarListSection from "./Components/CarListSection";
 import SearchSection from "./Components/SearchSection";
 import axiosInstance from "../../../api/axiosInstance";
-
+import { useSelector } from "react-redux";
+import { RootState } from "../../../redux/store";
 
 interface CarDetailsType {
   _id: string;
@@ -31,6 +32,8 @@ const CarsList: React.FC = () => {
 
   const[userSearch,setUserSearch] = useState('')
   
+  const userId = useSelector((state: RootState) => state.auth.userId)
+  
   const handleSortChange = (sort:string,transmission:string[],fuel:string[],seat:string[],distance:string[],search:string,carType:string[],carMake:string) => {    
       setSort(sort)
       setTransmission(transmission)
@@ -50,22 +53,33 @@ const CarsList: React.FC = () => {
   useEffect(() => {
     let lng = 0
     let lat = 0
+    let dateFrom = null
+    let dateTo = null
     if(sessionStorage.getItem('userlocation')){
       const coordinates = JSON.parse(sessionStorage.getItem('userlocation'))
       lng = coordinates.lng
       lat = coordinates.lat  
     }
+
+    if(sessionStorage.getItem('date')){
+      const storedDate = sessionStorage.getItem('date')
+      const parsedDate = JSON.parse(storedDate)
+      dateFrom = new Date(parsedDate.from)
+      dateTo = new Date(parsedDate.to)
+
+    }
     
     axiosInstance
       .get("/getrentcardetails", {
         params:{
-          sort,transmission,fuel,seat,distance,userSearch,lng,lat,carType,carMake
+          sort,transmission,fuel,seat,distance,userSearch,lng,lat,carType,carMake,
+          dateFrom,dateTo,userId
         }
       })
       .then((res) => {
         setCarListings(res.data);
       });
-  }, [sort,transmission,fuel,seat,distance,userSearch,carType,carMake]);
+  }, [sort,transmission,fuel,seat,distance,userSearch,carType,carMake,userId]);
 
   
 

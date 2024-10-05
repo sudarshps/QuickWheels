@@ -28,6 +28,8 @@ export interface ICar extends Document{
     address:string,
     isVerified:boolean,
     status:string,
+    availabilityFrom:Date,
+    availabilityTo:Date,
     note:string,
     images:[string]
 }
@@ -59,6 +61,8 @@ const carSchema:Schema<ICar> = new Schema({
       address:{type:String},
     isVerified:{type:Boolean,required:true},
     status:{type:String,required:true},
+    availabilityFrom:{type:Date},
+    availabilityTo:{type:Date},
     note:{type:String},
     images:{type:[String],required:true}
 },{timestamps:true})

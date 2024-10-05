@@ -108,9 +108,10 @@ const Navbar: React.FC<NavbarProps> = ({className}) => {
         const isHost = res.data.isHost
         const status = res.data.status
         const note = res.data.note
-        const role = res.data.role        
+        const role = res.data.role   
+        const verifiedUser = res.data.isVerified     
           dispatch(setUserDetails({dob,phone,drivingExpDate,address,drivingID,
-            drivingIDFront,drivingIDBack,profileUpdated,isHost,status,note,role}))        
+            drivingIDFront,drivingIDBack,profileUpdated,isHost,status,note,role,verifiedUser}))        
       })
     }
   },[isAuthenticated,dispatch,email])

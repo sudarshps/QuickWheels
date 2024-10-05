@@ -183,6 +183,10 @@ class UserRepository {
   async getCarType(): Promise<ICarTypeCategory[]> {
     return await CarType.find();
   }
+
+  async setCarDate(dateFrom:Date,dateTo:Date,carId:string): Promise<ICar | null> {
+    return await CarModel.findByIdAndUpdate(carId,{availabilityFrom:dateFrom,availabilityTo:dateTo})
+  }
 }
 
 export default new UserRepository();

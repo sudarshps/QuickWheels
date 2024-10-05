@@ -164,6 +164,7 @@ const Login: React.FC = () => {
       profileUpdated: boolean;
       isHost: boolean;
       status: string;
+      isVerified:boolean;
       role:string[];
       message: string;
     }
@@ -177,10 +178,9 @@ const Login: React.FC = () => {
       if (userResponse.data.validUser) {
         const profileUpdated = userResponse.data.profileUpdated;
         const isHost = userResponse.data.isHost;
-        const role = userResponse.data.role;
-        
+        const userId = userResponse.data.userId;
         dispatch(
-          setAuthorization({ profileUpdated: profileUpdated, isHost: isHost,role:role })
+          setAuthorization({userId:userId, profileUpdated: profileUpdated, isHost: isHost})
         );
         navigate("/");
       } else {

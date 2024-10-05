@@ -1,8 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
+
 const CarListSection: React.FC = ({carListings}) => {
-  
   const navigate = useNavigate();
 
   return (

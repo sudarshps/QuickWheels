@@ -1,40 +1,8 @@
-import axios from 'axios'
-import React, { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import React  from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUser } from '@fortawesome/free-solid-svg-icons'
 
-const CarDetailsSection:React.FC = () => {
-  const location = useLocation()
-  const queryParams = new URLSearchParams(location.search)
-  const id = queryParams.get('id')
-
-  const[carImages,setCarImages] = useState<string[]>([])
-  const[make,setMake] = useState('') 
-  const[type,setType] = useState('') 
-  const[model,setModel] = useState('')
-  const[transmission,setTransmission] = useState('')
-  const[fuel,setFuel] = useState('')
-  const[seat,setSeat] = useState('')
-  const[hostName,setHostName] = useState('')
-  
-  useEffect(()=>{
-    axios.get('http://localhost:3000/cardetails',{
-      params:{
-        id
-      }
-    })
-    .then(res=>{
-      setCarImages(res.data.images)
-      setMake(res.data.carMake[0].name)
-      setType(res.data.carType[0].name)
-      setModel(res.data.carModel)
-      setTransmission(res.data.transmission)
-      setFuel(res.data.fuel)
-      setSeat(res.data.seatCapacity)
-      setHostName(res.data.userDetails[0].name)
-    })
-  },[id])  
+const CarDetailsSection:React.FC = ({carImages,make,type,model,transmission,fuel,seat,hostName}) => {
   
   return (
     <>

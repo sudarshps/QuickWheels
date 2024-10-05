@@ -4,7 +4,6 @@ import { IUser } from "../models/user_model";
 import upload from "../services/upload_service";
 import { renewToken } from "../utils/jwt_utils";
 
-
 interface UploadedUserFiles {
   drivingIDFront: Express.Multer.File[];
   drivingIDBack: Express.Multer.File[];
@@ -27,10 +26,10 @@ class UserController {
         email,
         isVerified: false,
         isHost: false,
-        profileUpdated:false,
-        status:'Verification Pending',
-        approvedHost:false,
-        role:['USER']
+        profileUpdated: false,
+        status: "Verification Pending",
+        approvedHost: false,
+        role: ["USER"],
       });
       res.json(createUser);
     } catch (error) {
@@ -57,15 +56,15 @@ class UserController {
       if (validate.validUser) {
         const accessToken = validate.accessToken;
         const refreshToken = validate.refreshToken;
-        
+
         res.cookie("accessToken", accessToken, { maxAge: 1800000 });
         res.cookie("refreshToken", refreshToken, {
-          maxAge: 5*60*60*1000,
+          maxAge: 5 * 60 * 60 * 1000,
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: "strict",
         });
-       
+
         res.status(200).json(validate);
       } else {
         res.json(validate);
@@ -80,8 +79,8 @@ class UserController {
     if (!req.files) {
       return res.status(400).json({ message: "No files uploaded" });
     }
-        let {longitude,latitude,...userData} = req.body
-                
+    let { longitude, latitude, ...userData } = req.body;
+
     function isUploadedFiles(files: any): files is UploadedUserFiles {
       return (
         files &&
@@ -97,15 +96,17 @@ class UserController {
         drivingIDBackPath: req.files.drivingIDBack[0].path,
       };
 
-      userData.drivingIDFront = paths.drivingIDFrontPath
-      userData.drivingIDBack = paths.drivingIDBackPath
-      userData.profileUpdated = true
+      userData.drivingIDFront = paths.drivingIDFrontPath;
+      userData.drivingIDBack = paths.drivingIDBackPath;
+      userData.profileUpdated = true;
 
-      const userProfile = await UserService.userProfile(userData,longitude,latitude)
+      const userProfile = await UserService.userProfile(
+        userData,
+        longitude,
+        latitude
+      );
 
-      res.json(userProfile)
-      
-      
+      res.json(userProfile);
     } else {
       return res.status(400).json({ message: "Incorrect file structure" });
     }
@@ -148,162 +149,186 @@ class UserController {
     }
   }
 
-  async userDetails(req:Request,res:Response): Promise<void> {
-    const email = req.query.email as string 
+  async userDetails(req: Request, res: Response): Promise<void> {
+    const email = req.query.email as string;
     try {
-      const userDetails = await UserService.userDetails(email) 
-      if(userDetails){
-        res.json(userDetails)            
+      const userDetails = await UserService.userDetails(email);
+      if (userDetails) {
+        res.json(userDetails);
       }
     } catch (error) {
-      console.error('error fetching user details',error)
+      console.error("error fetching user details", error);
     }
   }
 
-// Host 
+  // Host
 
   async hostCarDetails(req: Request, res: Response) {
     try {
-      const {email,...rest} = req.body;
-       
+      const { email, ...rest } = req.body;
+
       if (!req.files) {
-        
         return res.status(400).json({ message: "No files uploaded" });
       }
-          let carData = rest
-          
-          
+      let carData = rest;
+
       function isUploadedFiles(files: any): files is UploadedCarFiles {
         return (
           files &&
-          typeof files === "object" && 
+          typeof files === "object" &&
           "images" in files &&
           "RCDoc" in files &&
           "InsuranceDoc" in files
         );
       }
-  
+
       if (isUploadedFiles(req.files)) {
         const paths = {
-          images: req.files.images.map(file=>file.path),
+          images: req.files.images.map((file) => file.path),
           RCDoc: req.files.RCDoc[0].path,
-          InsuranceDoc: req.files.InsuranceDoc[0].path
+          InsuranceDoc: req.files.InsuranceDoc[0].path,
         };
-  
-        carData.images = paths.images
-        carData.RCDoc = paths.RCDoc
-        carData.InsuranceDoc = paths.InsuranceDoc
 
-        let isVerified = false
-        let status = 'Verification Pending'
+        carData.images = paths.images;
+        carData.RCDoc = paths.RCDoc;
+        carData.InsuranceDoc = paths.InsuranceDoc;
 
-        const carDetails = await UserService.carDetails(email,carData,isVerified,status)
-        
-        res.json(carDetails)
-        
-        
+        let isVerified = false;
+        let status = "Verification Pending";
+
+        const carDetails = await UserService.carDetails(
+          email,
+          carData,
+          isVerified,
+          status
+        );
+
+        res.json(carDetails);
       } else {
         return res.status(400).json({ message: "Incorrect file structure" });
       }
-     
     } catch (error) {
       console.error("error in creating user");
     }
   }
 
+  async carDetails(req: Request, res: Response): Promise<void> {
+    const email = req.query.email as string;
 
-
-  async carDetails(req:Request,res:Response): Promise<void> {
-    const email = req.query.email as string
-    
     try {
-      const carDetails = await UserService.getCarDetails(email)
-      if(carDetails){
-        res.json(carDetails)
+      const carDetails = await UserService.getCarDetails(email);
+      if (carDetails) {
+        res.json(carDetails);
       }
-      
-      
     } catch (error) {
-      console.error('error fetching user details',error)
+      console.error("error fetching user details", error);
     }
   }
 
-
-  async rentCarDetails(req:Request,res:Response): Promise<void> {
+  async rentCarDetails(req: Request, res: Response): Promise<void> {
     try {
-      const sort = req.query.sort as string
-      const make = req.query.carMake as string
-      const transmission = req.query.transmission as string[] 
-      const fuel = req.query.fuel as string[] 
-      const seat = req.query.seat as string[] 
-      const distance = req.query.distance as string[]
-      const searchInput = req.query.userSearch as string
-      const carType = req.query.carType as string[]
-      let lngQuery = req.query.lng
-      let latQuery = req.query.lat    
-      let distanceValue = 0
+      const userId = req.query.userId as string
+      const sort = req.query.sort as string;
+      const make = req.query.carMake as string;
+      const transmission = req.query.transmission as string[];
+      const fuel = req.query.fuel as string[];
+      const seat = req.query.seat as string[];
+      const distance = req.query.distance as string[];
+      const searchInput = req.query.userSearch as string;
+      const carType = req.query.carType as string[];
+      let lngQuery = req.query.lng;
+      let latQuery = req.query.lat;
+      let distanceValue = 0;
+      const dateFrom = req.query.dateFrom as Date | undefined
+      const dateTo = req.query.dateTo as Date | undefined     
       
-      if(distance){
-        distanceValue = parseFloat(distance[0])
+      if (distance) {
+        distanceValue = parseFloat(distance[0]);
       }
 
       let lng: number | undefined;
       let lat: number | undefined;
 
-    if (typeof lngQuery === 'string') {
-      lng = parseFloat(lngQuery);
-    }
+      if (typeof lngQuery === "string") {
+        lng = parseFloat(lngQuery);
+      }
 
-    if (typeof latQuery === 'string') {
-      lat = parseFloat(latQuery);
-    }
+      if (typeof latQuery === "string") {
+        lat = parseFloat(latQuery);
+      }
 
-    if (lng === undefined || isNaN(lng) || lat === undefined || isNaN(lat)) {
-      res.status(400).send({ error: "Invalid longitude or latitude value" });
-      return;
-    }
-      
-      const carDetails = await UserService.rentCarDetails(sort,transmission,fuel,seat,lng,lat,distanceValue,searchInput,carType,make)      
-      res.json(carDetails)
+      if (lng === undefined || isNaN(lng) || lat === undefined || isNaN(lat)) {
+        res.status(400).send({ error: "Invalid longitude or latitude value" });
+        return;
+      }
+
+      const carDetails = await UserService.rentCarDetails(
+        userId,
+        sort,
+        transmission,
+        fuel,
+        seat,
+        lng,
+        lat,
+        distanceValue,
+        searchInput,
+        carType,
+        make,
+        dateFrom,
+        dateTo
+      );
+      res.json(carDetails);
     } catch (error) {
-      console.error('error in fetching rent car details',error);
+      console.error("error in fetching rent car details", error);
     }
   }
 
-  async userCarDetails(req:Request,res:Response):Promise<void> {
+  async userCarDetails(req: Request, res: Response): Promise<void> {
     try {
-      const {id} = req.query
-      const carDetails = await UserService.userCarDetails(id as string) 
-      res.json(carDetails)
-         
-    } catch (error) {
-      console.error('error in fetching user car details',error);
+      const { id,userId } = req.query;
       
+      const carDetails = await UserService.userCarDetails(id as string);
+      res.json(carDetails);
+    } catch (error) {
+      console.error("error in fetching user car details", error);
     }
   }
 
-  async getCarMake(req:Request,res:Response):Promise<void> {
+  async getCarMake(req: Request, res: Response): Promise<void> {
     try {
-      const response = await UserService.getCarMake()
-      res.json(response)
+      const response = await UserService.getCarMake();
+      res.json(response);
     } catch (error) {
-      console.error('error in getting car make list',error);
-      
+      console.error("error in getting car make list", error);
     }
   }
 
-  async getCarType(req:Request,res:Response):Promise<void> {
+  async getCarType(req: Request, res: Response): Promise<void> {
     try {
-      const response = await UserService.getCarType()
-      res.json(response)
+      const response = await UserService.getCarType();
+      res.json(response);
     } catch (error) {
-      console.error('error in getting car make list',error);
-      
+      console.error("error in getting car make list", error);
     }
   }
- 
+
+  async setCarDate(req: Request, res: Response): Promise<void> {
+    try {
+      const { dateFrom, dateTo, carId } = req.body;
+      const response = await UserService.setCarDate(dateFrom, dateTo, carId);
+      if (!response) {
+        res.json({ dateUpdated: false, message: "not updated" });
+      }
+      res.json({
+        dateFrom: response?.availabilityFrom,
+        dateTo: response?.availabilityTo,
+        dateUpdated: true,
+        message: "updated",
+      });
+    } catch (error) {
+      console.error("error in updating availability date!", error);
+    }
+  }
 }
 
-
- 
 export default new UserController();

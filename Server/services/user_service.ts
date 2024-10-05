@@ -36,12 +36,15 @@ interface CarDetailsResponse {
 
 interface CarDetails {
   carDetails: boolean;
+  id?:ObjectId;
   model?: string;
   registerNumber?: string;
   insuranceExp?: string;
   images?: string[];
   status?: string;
   note?: string;
+  dateFrom?:Date,
+  dateTo?:Date,
   message: string;
 }
 
@@ -53,6 +56,7 @@ interface userValidate {
   userId?: ObjectId;
   profileUpdated?: boolean;
   isHost?: boolean;
+  isVerified?:boolean;
   status?: string;
   role?: string[];
   message?: string;
@@ -174,6 +178,7 @@ class UserService {
           validUser: true,
           username: user.name,
           userId: user._id,
+          isVerified: Boolean(user.isVerified),
           accessToken: accessToken,
           refreshToken: refreshToken,
           profileUpdated: Boolean(user.profileUpdated),
@@ -245,12 +250,15 @@ class UserService {
     if (carDetails) {
       return {
         carDetails: true,
+        id:carDetails._id,
         model: carDetails.carModel,
         registerNumber: carDetails.registerNumber,
         insuranceExp: carDetails.insuranceExp,
         images: carDetails.images,
         status: carDetails.status,
         note: carDetails.note,
+        dateFrom:carDetails.availabilityFrom,
+        dateTo:carDetails.availabilityTo,
         message: "Car Details Created",
       };
     }
@@ -262,6 +270,7 @@ class UserService {
   }
 
   async rentCarDetails(
+    userId:string,
     sort: string,
     transmission: string[],
     fuel: string[],
@@ -271,13 +280,16 @@ class UserService {
     distanceValue: number,
     searchInput: string,
     carType: string[],
-    make:string
+    make:string,
+    dateFrom:Date | undefined,
+    dateTo:Date | undefined
   ): Promise<ICar[] | null> {
     let carDetails = await userRepository.getRentCarDetails();
 
     if (carDetails && lng !== 0 && lat !== 0) {
       carDetails = await userRepository.getCarDistance(lng, lat, distanceValue);
     }
+
 
     if (carDetails && searchInput.trim()) {
       const regex = new RegExp(searchInput, "i");
@@ -305,6 +317,30 @@ class UserService {
     if (!carDetails) {
       return null;
     }
+
+    
+
+    if(dateFrom && dateTo){
+      
+        carDetails = carDetails.filter((car)=>{
+          const from = new Date(dateFrom)
+          const to = new Date(dateTo) 
+          
+          return(
+            from>=car.availabilityFrom && to<=car.availabilityTo
+          )
+        })
+    }    
+    
+    if(userId){
+      carDetails = carDetails.filter((car)=>{
+        
+        return(
+          car.userId.toString() !== userId
+        )
+      })
+    }
+
     if(make){
       carDetails = carDetails.filter((car) => {
         const carMakeName = 
@@ -380,6 +416,10 @@ class UserService {
   }
   async getCarType(): Promise<ICarTypeCategory[]> {
     return await userRepository.getCarType();
+  }
+
+  async setCarDate(dateFrom:Date,dateTo:Date,carId:string): Promise<ICar | null> {
+    return await userRepository.setCarDate(dateFrom,dateTo,carId)
   }
 }
 

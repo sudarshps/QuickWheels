@@ -2,6 +2,7 @@ import { createSlice,PayloadAction } from "@reduxjs/toolkit";
 
 
 interface AuthState {
+    userId:string | null;
     user:string | null;
     email:string | null;
     profileUpdated:Boolean,
@@ -12,6 +13,7 @@ interface AuthState {
 
 
 const initialState:AuthState = {
+    userId:null,
     user:null,
     email:null,
     profileUpdated:false,
@@ -32,12 +34,14 @@ const authSlice = createSlice({
             state.isHost = isHost
             state.role = role
         },
-        setAuthorization:(state,action:PayloadAction<{profileUpdated:boolean,isHost:boolean}>)=>{            
-            const{profileUpdated,isHost} = action.payload
+        setAuthorization:(state,action:PayloadAction<{userId:string,profileUpdated:boolean,isHost:boolean,verifiedUser:boolean}>)=>{            
+            const{profileUpdated,isHost,userId} = action.payload
             state.profileUpdated = profileUpdated
             state.isHost = isHost
+            state.userId = userId
         },
         logOut:(state,action)=>{
+            state.userId = null
             state.user = null
             state.email = null
             state.profileUpdated = false

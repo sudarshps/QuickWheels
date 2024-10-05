@@ -9,6 +9,7 @@ interface UserState {
     drivingIDFront:string|null;
     drivingIDBack:string|null;
     profileUpdated:boolean | null;
+    verifiedUser:boolean | null;
     isHost:boolean | null;
     status:string | null;
     role:string[];
@@ -24,6 +25,7 @@ const initialState:UserState = {
     drivingIDFront:null,   
     drivingIDBack:null,
     profileUpdated:false,
+    verifiedUser:false,
     isHost:false,
     status:null,
     role:[],
@@ -36,7 +38,7 @@ const userDetailSlice = createSlice({
     initialState,
     reducers:{
         setUserDetails:(state,action:PayloadAction<UserState>) => {
-            const {dob,phone,drivingExpDate,address,drivingID,drivingIDFront,drivingIDBack,profileUpdated,isHost,status,role,note} = action.payload
+            const {dob,phone,drivingExpDate,address,drivingID,drivingIDFront,drivingIDBack,profileUpdated,isHost,status,role,note,verifiedUser} = action.payload
 
             state.dob = dob
             state.phone = phone
@@ -46,6 +48,7 @@ const userDetailSlice = createSlice({
             state.drivingIDFront = drivingIDFront
             state.drivingIDBack = drivingIDBack
             state.profileUpdated = profileUpdated
+            state.verifiedUser = verifiedUser
             state.isHost = isHost
             state.status = status
             state.role = role

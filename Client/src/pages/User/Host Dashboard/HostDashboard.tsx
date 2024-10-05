@@ -12,17 +12,26 @@ import {
   faCircleCheck,
   faCircleXmark,
 } from "@fortawesome/free-solid-svg-icons";
+import { DatePickerWithRange } from "../../../components/ui/daterangepicker";
+import { DateRange } from "react-day-picker";
 
 const HostDashboard: React.FC = () => {
   const email = useSelector((state: RootState) => state.auth.email);
+  const [carId, setCarId] = useState('')
   const [model, setModel] = useState("");
   const [registerNumber, setRegisterNumber] = useState("");
   const [insuranceExp, setInsuranceExp] = useState("");
   const [images, setImages] = useState("");
   const [status, setStatus] = useState("");
   const [note,setNote] = useState("");
-
+  const [carDateFrom,setCarDateFrom] = useState('')
+  const [carDateTo,setCarDateTo] = useState('')
+  const [availabilityDate,setAvailabilityDate] = useState<DateRange | undefined>()
   const navigate = useNavigate();
+
+  const handleDate = (date:DateRange | undefined) => {
+    setAvailabilityDate(date)
+  }  
 
   useEffect(() => {
     if (email) {
@@ -33,11 +42,16 @@ const HostDashboard: React.FC = () => {
           })
           .then((res) => {
             if (res.data) {
+              const dateFrom = res.data.dateFrom.toString()
+              const dateTo = res.data.dateTo.toString()
+              setCarId(res.data.id)
               setModel(res.data.model);
               setRegisterNumber(res.data.registerNumber);
               setInsuranceExp(res.data.insuranceExp);
               setImages(res.data.images[0]);
               setStatus(res.data.status);
+              setCarDateFrom(dateFrom)
+              setCarDateTo(dateTo)
               setNote(res.data.note)
             }
           });
@@ -46,6 +60,22 @@ const HostDashboard: React.FC = () => {
       }
     }
   }, [email]);
+
+  const handleAvailabilitySet = () => {
+
+    const dateFrom = availabilityDate?.from
+    const dateTo = availabilityDate?.to
+
+    axiosInstance.put('/setavailablitydate',{dateFrom,dateTo,carId})
+    .then(res=>{
+      if(res.data.dateUpdated){
+        alert('Date set successfully!')
+      }else{
+        alert('Date was not updated!')
+
+      }
+    })
+  }
 
   return (
     <>
@@ -90,15 +120,20 @@ const HostDashboard: React.FC = () => {
                       Insurance:{" "}
                       <span className="text-green-600">{insuranceExp}</span>
                     </p>
-                    <p>
-                      Availability: <span>Not set</span>
+                    <p className="flex items-center  ">
+                      Availability: <span className="ms-2">{carDateFrom.slice(0,10)} - {carDateTo.slice(0,10)}</span>
+                      
                     </p>
+                    <p className="mt-4 flex">
+                      <span><DatePickerWithRange onDateChange={handleDate}/></span>
+                      <button className="bg-yellow-500 text-white px-4 py-2 ms-2 text-sm rounded mr-2" onClick={handleAvailabilitySet}>
+                    Set 
+                  </button>
+                    </p>
+                    
                   </div>
                 </div>
                 <div className="flex mt-4">
-                  <button className="bg-yellow-500 text-white px-4 py-2 rounded mr-2">
-                    Set Availability
-                  </button>
                   <button
                     className="bg-red-500 text-white px-4 py-2 rounded"
                     onClick={() => navigate("/editcardetails")}
