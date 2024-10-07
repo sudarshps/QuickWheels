@@ -18,7 +18,9 @@ const CarDetails: React.FC = () => {
   const [transmission, setTransmission] = useState("");
   const [fuel, setFuel] = useState("");
   const [seat, setSeat] = useState("");
+  const [features,setFeatures] = useState([])
   const [hostName, setHostName] = useState("");
+  const [address, setAddress] = useState("");
   const [amount, setAmount] = useState<number | null>(null);
 
   useEffect(() => {
@@ -28,13 +30,15 @@ const CarDetails: React.FC = () => {
           id
         },
       })
-      .then((res) => {
+      .then((res) => {        
         setCarImages(res.data.images);
+        setAddress(res.data.address)
         setMake(res.data.carMake[0].name);
         setType(res.data.carType[0].name);
         setModel(res.data.carModel);
         setTransmission(res.data.transmission);
         setFuel(res.data.fuel);
+        setFeatures(res.data.features)
         setSeat(res.data.seatCapacity);
         setHostName(res.data.userDetails[0].name);
         setAmount(res.data.rentAmount)
@@ -55,6 +59,8 @@ const CarDetails: React.FC = () => {
           fuel={fuel}
           seat={seat}
           hostName={hostName}
+          address={address}
+          features={features}
         />
         <ProceedSection amount={amount}/>
       </div>

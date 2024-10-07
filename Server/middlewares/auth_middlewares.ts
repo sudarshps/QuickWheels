@@ -8,8 +8,7 @@ export interface AuthRequest extends Request {
 const verifyUser = (req: AuthRequest, res: Response, next: NextFunction):Object | void => {
     const accessToken = req.cookies.accessToken;
     const refreshToken = req.cookies.refreshToken;
-    
-
+        
     if(accessToken){
         const decoded = verifyToken(accessToken)
         if(decoded){            

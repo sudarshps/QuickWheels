@@ -2,7 +2,7 @@ import {Router} from 'express'
 import userController from '../controllers/user_controller'
 import verifyUser from '../middlewares/auth_middlewares'
 import upload from '../services/upload_service'
-
+import makeOrder from '../utils/razor_pay'
 
 const router: Router = Router()
 
@@ -22,5 +22,7 @@ router.post('/hostregister',upload.fields([{name:'images',maxCount:5},{name:'RCD
 router.get('/getcardetails',verifyUser,userController.carDetails)
 router.put('/setavailablitydate',verifyUser,userController.setCarDate)
 
+//razor pay
+router.post('/order',verifyUser,makeOrder)
 
 export default router;
