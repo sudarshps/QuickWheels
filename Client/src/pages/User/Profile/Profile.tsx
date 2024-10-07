@@ -299,17 +299,9 @@ const Profile: React.FC = () => {
     <>
       <Navbar />
       <div className="flex flex-col userprofile items-center py-8 bg-gray-50 min-h-screen">
-        <div className="bg-white shadow-lg rounded-lg w-full max-w-6xl p-8 mt-20">
+        <div className="bg-white shadow-lg rounded-lg w-full max-w-5xl p-8 mt-20">
           <div className="flex">
-            <div className="w-1/4 pr-8 border-r border-gray-200">
-              <ul className="space-y-4 text-gray-700 font-semibold">
-                <li>Personal Details</li>
-                <li>Orders</li>
-                <li>Booking History</li>
-              </ul>
-            </div>
-
-            <div className="w-3/4 pl-8">
+            <div>
               <div className="flex items-center mb-8">
                 <div className="w-24 h-24 rounded-full bg-gray-200 flex justify-center items-center relative">
                   <FontAwesomeIcon icon={faUser} className="text-3xl" />

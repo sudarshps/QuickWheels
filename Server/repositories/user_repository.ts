@@ -2,6 +2,7 @@ import User, { IUser } from "../models/user_model";
 import CarModel, { ICar } from "../models/car_model";
 import CarMake, { ICarMakeCategory } from "../models/carmake-category_model";
 import CarType, { ICarTypeCategory } from "../models/cartype-category_model";
+import OrderModel,{IOrder} from '../models/orders'
 import { Types } from "mongoose";
 
 interface UserAddress {
@@ -186,6 +187,11 @@ class UserRepository {
 
   async setCarDate(dateFrom:Date,dateTo:Date,carId:string): Promise<ICar | null> {
     return await CarModel.findByIdAndUpdate(carId,{availabilityFrom:dateFrom,availabilityTo:dateTo})
+  }
+
+  async successOrder(order:object){
+    const orderData = new OrderModel(order)
+    return await orderData.save()
   }
 }
 

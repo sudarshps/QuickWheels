@@ -23,6 +23,10 @@ import Category from './pages/Admin/Category/Category.tsx'
 import CarDetailsSection from './pages/User/Car Details/components/CarDetailsSection.tsx'
 
 import GuestRoute from './components/Guest Route/GuestRoute.tsx'
+import Orders from './pages/User/Orders/Orders.tsx'
+import OrderDetails from './pages/User/Order Details/OrderDetails.tsx'
+import AdminOrders from './pages/Admin/Orders/AdminOrders.tsx'
+import OrderSuccess from './pages/User/Order Success/OrderSuccess.tsx'
 
 
 function App() {
@@ -45,6 +49,9 @@ function App() {
         <Route path='/becomehost' element={<HostStartup/>}/>
         <Route path='/profile' element={<Profile/>}/>
         <Route path='/hostregister' element={<RegisterForm/>}/>
+        <Route path='/orders' element={<Orders/>}/>
+        <Route path='/orderdetails' element={<OrderDetails/>}/>
+        <Route path='/orderplaced' element={<OrderSuccess/>}/>
         </Route>
         <Route element={<ProtectedRoute allowedRoles={['HOST']}/>}>
         <Route path='/hostdashboard' element={<HostDashboard/>}/>
@@ -60,6 +67,7 @@ function App() {
         <Route path='/admin/userverification' element={<UserVerification/>}/>
         <Route path='/admin/hostverification' element={<HostVerification/>}/>
         <Route path='/admin/category' element={<Category/>}/>
+        <Route path='/admin/orders' element={<AdminOrders/>}/>
         </Route>     
       </Routes>
     </Router>

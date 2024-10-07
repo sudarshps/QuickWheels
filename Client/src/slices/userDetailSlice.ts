@@ -1,6 +1,7 @@
 import { createSlice,PayloadAction } from "@reduxjs/toolkit";
 
 interface UserState {
+    userId:string | null;
     dob:string | null;
     phone:string | null;
     drivingExpDate:string | null;
@@ -17,6 +18,7 @@ interface UserState {
 }
 
 const initialState:UserState = {
+    userId:null,
     dob:null,
     phone:null,
     drivingExpDate:null,
@@ -38,8 +40,8 @@ const userDetailSlice = createSlice({
     initialState,
     reducers:{
         setUserDetails:(state,action:PayloadAction<UserState>) => {
-            const {dob,phone,drivingExpDate,address,drivingID,drivingIDFront,drivingIDBack,profileUpdated,isHost,status,role,note,verifiedUser} = action.payload
-
+            const {userId,dob,phone,drivingExpDate,address,drivingID,drivingIDFront,drivingIDBack,profileUpdated,isHost,status,role,note,verifiedUser} = action.payload
+            state.userId = userId
             state.dob = dob
             state.phone = phone
             state.drivingExpDate = drivingExpDate

@@ -5,20 +5,21 @@ import { useNavigate } from "react-router-dom";
 import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
 import axiosInstance from "../../../../api/axiosInstance";
 
-const ProceedSection: React.FC = ({ amount }) => {
+const ProceedSection: React.FC = ({ amount,carId }) => {
   const [selectedHours, setSelectedHours] = useState<number | null>();
+  const date = sessionStorage.getItem("date");
+  const parsedDate = JSON.parse(date);
+  const toDate = new Date(parsedDate.to);
+  const fromDate = new Date(parsedDate.from);
   useEffect(() => {
-    const date = sessionStorage.getItem("date");
     if (date) {
-      const parsedDate = JSON.parse(date);
-      const toDate = new Date(parsedDate.to);
-      const fromDate = new Date(parsedDate.from);
       const hourDiff = (toDate - fromDate) / (1000 * 60 * 60);
       setSelectedHours(hourDiff);
     }
   }, []);
   const username = useSelector((state:RootState) => state.auth.user) as string
   const email = useSelector((state: RootState) => state.auth.email) as string
+  const userId = useSelector((state:RootState) => state.userDetails.userId) as string
   const verifiedUser = useSelector(
     (state: RootState) => state.userDetails.verifiedUser
   );
@@ -31,7 +32,7 @@ const ProceedSection: React.FC = ({ amount }) => {
   const handleLogin = () => {
     alert("please login to continue");
     navigate("/login");
-  };
+  };  
 
   const handleVerify = () => {
     alert("please verify your profile to proceed");
@@ -55,7 +56,16 @@ const ProceedSection: React.FC = ({ amount }) => {
           order_id: res.data.order_id, // Generate order_id on server
           handler: (response) => {        
             console.log(response);
-            alert("Payment Successful!");
+            const orderId = response.razorpay_order_id
+            const paymentId = response.razorpay_payment_id
+            const amount = res.data.amount
+            axiosInstance.post('/successorder',{orderId,toDate,fromDate,carId,paymentId,amount,userId})
+            .then(res=>{
+                if(res.data){
+                  console.log('res',res.data);   
+                  navigate('/orderplaced')
+                }
+            })
           },
           prefill: {
             name: username,

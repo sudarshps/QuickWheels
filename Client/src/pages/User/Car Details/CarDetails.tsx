@@ -62,7 +62,7 @@ const CarDetails: React.FC = () => {
           address={address}
           features={features}
         />
-        <ProceedSection amount={amount}/>
+        <ProceedSection amount={amount} carId={id}/>
       </div>
     </>
   );

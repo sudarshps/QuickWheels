@@ -97,6 +97,7 @@ const Navbar: React.FC<NavbarProps> = ({className}) => {
         }
       })
       .then(res=>{
+        const userId = res.data.id
         const dob = res.data.dob
         const phone = res.data.phone
         const drivingExpDate = res.data.drivingExpDate
@@ -110,7 +111,7 @@ const Navbar: React.FC<NavbarProps> = ({className}) => {
         const note = res.data.note
         const role = res.data.role   
         const verifiedUser = res.data.isVerified     
-          dispatch(setUserDetails({dob,phone,drivingExpDate,address,drivingID,
+          dispatch(setUserDetails({userId,dob,phone,drivingExpDate,address,drivingID,
             drivingIDFront,drivingIDBack,profileUpdated,isHost,status,note,role,verifiedUser}))        
       })
     }
@@ -251,6 +252,12 @@ const Navbar: React.FC<NavbarProps> = ({className}) => {
                             My Dashboard
                           </li>
                         )}
+                        <li
+                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => navigate("/orders")}
+                          >
+                            Orders
+                          </li>
                         <li
                           className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                           onClick={handleLogout}

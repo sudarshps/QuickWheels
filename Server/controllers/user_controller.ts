@@ -329,6 +329,16 @@ class UserController {
       console.error("error in updating availability date!", error);
     }
   }
+
+  async successOrder(req:Request,res:Response):Promise<void> {
+    try {
+      const {orderId,toDate,fromDate,carId,paymentId,amount,userId} = req.body
+      const response = await UserService.successOrder(orderId,toDate,fromDate,carId,paymentId,amount,userId)  
+      res.json(response)
+    } catch (error) {
+      console.error('error in posting success order!',error);
+    }
+  }
 }
 
 export default new UserController();

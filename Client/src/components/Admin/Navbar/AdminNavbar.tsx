@@ -22,7 +22,7 @@ const Navbar: React.FC = () => {
         <Link to="/admin/hostlist" className="hover:text-gray-400">
           Host
         </Link>
-        <Link to="#" className="hover:text-gray-400">
+        <Link to="/admin/orders" className="hover:text-gray-400">
           Orders
         </Link>
         <Link to="#" className="hover:text-gray-400">

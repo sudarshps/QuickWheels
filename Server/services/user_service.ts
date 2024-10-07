@@ -63,6 +63,7 @@ interface userValidate {
 }
 
 interface UserDetails {
+  id?:ObjectId;
   dob: string;
   phone: string;
   address: string;
@@ -81,6 +82,11 @@ interface UserDetails {
 type ICarWithHostName = ICar & {
   hostName?: string;
 };
+
+interface OrderType {
+  successOrder:boolean,
+  message:string
+}
 
 class UserService {
   async createUser(userData: Partial<IUser>): Promise<UserResponse> {
@@ -201,6 +207,7 @@ class UserService {
     const user = await userRepository.findUserByEmail(email);
     if (user) {
       return {
+        id: user._id,
         dob: user.dob,
         phone: user.phone,
         address: user.address,
@@ -420,6 +427,30 @@ class UserService {
 
   async setCarDate(dateFrom:Date,dateTo:Date,carId:string): Promise<ICar | null> {
     return await userRepository.setCarDate(dateFrom,dateTo,carId)
+  }
+  async successOrder(orderId:string,toDate:Date,fromDate:Date,carId:string,paymentId:string,amount:number,userId:string):Promise<OrderType | undefined>{
+    const order = {
+      orderId:orderId,
+      carId:carId,
+      amount:amount/100,
+      pickUpDate:fromDate,
+      dropOffDate:toDate,
+      userId:userId,
+      paymentId:paymentId,
+      status:'success'
+    }
+    const response = await userRepository.successOrder(order)
+    if(!response){
+      return{
+        successOrder:false,
+        message:'failed to create order'
+      }
+    }
+    return{
+      successOrder:true,
+      message:'order created successfully!'
+    } 
+
   }
 }
 

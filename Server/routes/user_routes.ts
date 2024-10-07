@@ -21,6 +21,7 @@ router.get('/getcartype',userController.getCarType)
 router.post('/hostregister',upload.fields([{name:'images',maxCount:5},{name:'RCDoc',maxCount:1},{name:'InsuranceDoc',maxCount:1}]),userController.hostCarDetails)
 router.get('/getcardetails',verifyUser,userController.carDetails)
 router.put('/setavailablitydate',verifyUser,userController.setCarDate)
+router.post('/successorder',verifyUser,userController.successOrder)
 
 //razor pay
 router.post('/order',verifyUser,makeOrder)
