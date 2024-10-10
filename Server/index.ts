@@ -11,7 +11,6 @@ import passportAuth from './config/passport'
 import path from 'path'
 import cookieParser = require('cookie-parser')
 
- 
 dotenv.config()
 
 const app = express()
@@ -20,7 +19,7 @@ connectDb()
 
 app.use(cors({
     origin: ['http://localhost:5173'],
-    methods:['GET','POST','PUT','DELETE'],
+    methods:['GET','POST','PUT','DELETE','PATCH'],
     credentials:true
 }))
 

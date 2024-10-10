@@ -21,6 +21,8 @@ router.delete('/removemakecategory',verifyAdmin,adminController.removeMakeCatego
 router.delete('/removetypecategory',verifyAdmin,adminController.removeTypeCategory)
 router.put('/updatemakecategory',verifyAdmin,adminController.updateMakeCategory)
 router.put('/updatetypecategory',verifyAdmin,adminController.updateTypeCategory)
+router.put('/userstatus',verifyAdmin,adminController.userStatus)
+router.put('/hoststatus',verifyAdmin,adminController.hostStatus)
 
 
 export default router

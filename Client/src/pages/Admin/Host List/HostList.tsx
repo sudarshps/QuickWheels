@@ -2,13 +2,17 @@ import React, { useState,useEffect } from 'react'
 import Navbar from '../../../components/Admin/Navbar/AdminNavbar'
 import axios from '../../../api/axios';
 import { useNavigate } from 'react-router-dom';
-
+import Pagination from '../../../components/Pagination/Pagination';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface Host{
-  _id:string;
+   _id:string;
+   userId:string;
    hostName:string;
    email:string;
    dob:string;
+   isActive:boolean;
    carModel:string;
    status:string;
 }
@@ -16,6 +20,23 @@ interface Host{
 const HostList:React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [hosts,setHosts] = useState<Host[]>([])
+  const [startIndex, setStartIndex] = useState(0);
+  const rowsPerPage = 5;
+  const [endIndex, setEndIndex] = useState(rowsPerPage);
+  const [refresh,setRefresh] = useState(false)
+
+  const handlePrev = () => {
+    setStartIndex(startIndex - rowsPerPage);
+    setEndIndex(endIndex - rowsPerPage);
+  };
+
+  const handleNext = () => {
+    if(endIndex < hosts.length){
+      setStartIndex(startIndex + rowsPerPage);
+    setEndIndex(endIndex + rowsPerPage);
+    }
+  };
+  
 
   const navigate = useNavigate()
 
@@ -33,7 +54,25 @@ const HostList:React.FC = () => {
     }
 
     fetchUsers()
-  },[]);
+  },[refresh]);
+
+  const handleAction = (status,hostId,carId) => {
+    const hostStatus = !status        
+      axios.put('/hoststatus',{status:hostStatus,hostId,carId})
+      .then(res=>{
+        toast.success(res.data.message, {
+          position: "top-right",
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light"
+          });
+          setRefresh(prev=>!prev)
+      })
+  }
 
   
 
@@ -45,7 +84,7 @@ const HostList:React.FC = () => {
           <h2 className="text-white text-xl md:text-2xl font-semibold mb-4">
             Host & Car Verification
           </h2>
-
+          <ToastContainer/>
           <div className="mb-8">
             <input
               type="text"
@@ -78,6 +117,7 @@ const HostList:React.FC = () => {
                         <td className="py-3 px-2 md:px-4">{host.carModel}</td>
                         <td className="py-3 px-2 md:px-4">{host.dob}</td>
                         <td className="py-3 px-2 md:px-4">{host.status}</td>
+                        <td className="py-3 px-2 md:px-4"><button className={host.isActive?`bg-red-500 rounded-md px-3 py-1`:`bg-green-500 rounded-md px-3 py-1`} onClick={()=>handleAction(host.isActive,host.userId,host._id)}>{host.isActive?'Block':'Unblock'}</button></td>
                         <td className="py-3 px-2 md:px-4 text-blue-300 hover:underline cursor-pointer" onClick={()=>navigate(`/admin/hostverification?id=${host._id}`)}>
                           View Details
                         </td>
@@ -89,6 +129,13 @@ const HostList:React.FC = () => {
               </tbody>
             </table>
           </div>:<div className="flex items-center justify-center"><p className="text-white">No Recored Found!</p></div>}
+          {hosts.length>rowsPerPage?<Pagination 
+          dataLength={hosts.length}
+          startIndex={startIndex}
+          endIndex={endIndex}
+          prev={handlePrev}
+          next={handleNext}
+          textColor={"text-white mt-3"}/>:''}
           </div>
 
           

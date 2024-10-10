@@ -6,6 +6,7 @@ import { signAccessToken, signRefreshToken } from "../utils/jwt_utils";
 import { ICar } from "../models/car_model";
 import { ICarMakeCategory } from "../models/carmake-category_model";
 import { ICarTypeCategory } from "../models/cartype-category_model";
+import { IOrder } from "../models/orders";
 
 interface EmailValidate {
   emailExists: boolean;
@@ -229,13 +230,15 @@ class UserService {
     email: string,
     carData: object,
     isVerified: boolean,
-    status: string
+    status: string,
+    isActive:boolean
   ): Promise<CarDetailsResponse> {
     const carDetails = await userRepository.carDetails(
       email,
       carData,
       isVerified,
-      status
+      status,
+      isActive
     );
 
     if (carDetails) {
@@ -296,7 +299,7 @@ class UserService {
     if (carDetails && lng !== 0 && lat !== 0) {
       carDetails = await userRepository.getCarDistance(lng, lat, distanceValue);
     }
-
+    
 
     if (carDetails && searchInput.trim()) {
       const regex = new RegExp(searchInput, "i");
@@ -394,7 +397,7 @@ class UserService {
       );
     }
 
-    carDetails = carDetails.filter((car) => car.isVerified === true);
+    carDetails = carDetails.filter((car) => car.isVerified === true && car.isActive === true);
 
     return carDetails;
   }
@@ -451,6 +454,10 @@ class UserService {
       message:'order created successfully!'
     } 
 
+  }
+
+  async userOrders(userId:string):Promise<IOrder[] | null> {
+    return await userRepository.userOrders(userId)
   }
 }
 

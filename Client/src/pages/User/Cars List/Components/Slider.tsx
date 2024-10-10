@@ -9,7 +9,7 @@ export function SliderComponent({ className, ...props }: SliderProps) {
       onValueChange={(value)=>{}}
       max={100}
       step={1}
-      className={cn("w-[100%]", className)}
+      className={cn("w-[75%]", className)}
       {...props}
     />
   )

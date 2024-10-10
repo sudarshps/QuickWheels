@@ -185,6 +185,29 @@ class AdminController {
         console.error('error in updating category',error);
     }
   }
+
+  async userStatus(req:Request,res:Response):Promise<void> {
+    try {
+      const {status,userId} = req.body      
+      const response = await AdminService.userStatus(status,userId)
+      res.json(response)
+      
+    } catch (error) {
+      console.error('error in updating user block/unblock',error);
+      
+    }
+  }
+
+  async hostStatus(req:Request,res:Response):Promise<void> {
+    try {
+      const {status,hostId,carId} = req.body
+      const response = await AdminService.hostStatus(status,hostId,carId)
+      res.json(response)
+    } catch (error) {
+      console.error('error in updating host status',error);
+      
+    }
+  }
 }
 
 export default new AdminController();

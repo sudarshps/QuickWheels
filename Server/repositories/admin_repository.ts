@@ -5,7 +5,7 @@ import CarMake,{ICarMakeCategory} from '../models/carmake-category_model'
 import { Types } from "mongoose";
 
 interface ICarWithUserDetails extends ICar {
-    userDetails:IUser
+  userDetails:IUser
 }
 
 class AdminRepository {
@@ -100,6 +100,24 @@ class AdminRepository {
   async updateTypeCategory(newCategory:string,categoryId:string):Promise<ICarTypeCategory | null> {
     return await CarType.findByIdAndUpdate(categoryId,{name:newCategory})
   }
+
+  async userStatus(status:boolean,userId:string):Promise<IUser | null> {        
+    return await User.findByIdAndUpdate(userId,{isActive:status})
+  }
+
+  async hostStatus(status:boolean,hostId:string,carId:string):Promise<IUser | ICar | null> {
+    
+    const response = await CarModel.findByIdAndUpdate(carId,{isActive:status})
+    if(response){
+      const user = await User.findById(hostId)
+      if(user?.isActive !== status){
+        return await User.findByIdAndUpdate(hostId,{isActive:status})
+      }
+    }
+    return response
+  }
+
+      
 }
 
 export default new AdminRepository();

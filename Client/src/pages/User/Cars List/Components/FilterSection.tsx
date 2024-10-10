@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { TooltipDemo } from "./Tooltip";
 import axiosInstance from "../../../../api/axiosInstance";
+
 interface FilterSectionProps {
   onSortChange: (
     sort: string,
@@ -99,13 +100,13 @@ const FilterSection: React.FC<FilterSectionProps> = ({ onSortChange,search }) =>
         <div className="bg-red-500 text-white font-semibold px-4 py-2 rounded-md mb-4">
           Filters
         </div>
-        <div className="space-y-6">
+        <div className="custom-scrollbar space-y-6 h-80 overflow-y-auto px-6 scrollbar-thin scrollbar-thumb-rounded scrollbar-thumb-red-500">
           <div>
             <h3 className="font-semibold mb-2">Sort By</h3>
             <div className="flex items-center">
               <select
                 onChange={handleSortChange}
-                className="pl-3 pr-20 py-2 border border-red-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
+                className="pl-3 py-2 border border-red-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
               >
                 <option>Relevance</option>
                 <option value="lowtohigh">Price: Low to High</option>
@@ -124,7 +125,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ onSortChange,search }) =>
             <div className="flex items-center">
               <select
                 onChange={e=>setCarMake(e.target.value)}
-                className="pl-3 pr-28 py-2 border border-red-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
+                className="pl-3 pr-8 py-2 border border-red-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
               >
                 <option>Select</option>
                 {make.map((make,ind)=>(
@@ -210,7 +211,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({ onSortChange,search }) =>
 
           <div>
             <button
-              className="bg-red-500 text-white px-20 py-2 rounded-md hover:bg-red-600 transition-colors duration-100 whitespace-nowrap"
+              className="bg-red-500 text-white px-12 py-2 rounded-md hover:bg-red-600 transition-colors duration-100 whitespace-nowrap"
               onClick={() => onSortChange(sort, transmission, fuel, seat, distance,search,carType,carMake)}
             >
               Apply Filters

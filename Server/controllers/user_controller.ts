@@ -26,6 +26,7 @@ class UserController {
         email,
         isVerified: false,
         isHost: false,
+        isActive:true,
         profileUpdated: false,
         status: "Verification Pending",
         approvedHost: false,
@@ -195,12 +196,14 @@ class UserController {
 
         let isVerified = false;
         let status = "Verification Pending";
+        let isActive = true;
 
         const carDetails = await UserService.carDetails(
           email,
           carData,
           isVerified,
-          status
+          status,
+          isActive
         );
 
         res.json(carDetails);
@@ -337,6 +340,17 @@ class UserController {
       res.json(response)
     } catch (error) {
       console.error('error in posting success order!',error);
+    }
+  }
+
+  async userOrders(req:Request,res:Response):Promise<void> {
+    try {
+      const userId = req.query.userId as string 
+      const response = await UserService.userOrders(userId)            
+      res.json(response)
+    } catch (error) {
+      console.error('error in fetching user orders',error);
+      
     }
   }
 }

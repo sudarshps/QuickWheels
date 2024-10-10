@@ -5,7 +5,9 @@ import { useNavigate } from "react-router-dom";
 import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
 import axiosInstance from "../../../../api/axiosInstance";
 
-const ProceedSection: React.FC = ({ amount,carId }) => {
+
+
+const ProceedSection: React.FC = ({ amount,carId,handleAlert }) => {
   const [selectedHours, setSelectedHours] = useState<number | null>();
   const date = sessionStorage.getItem("date");
   const parsedDate = JSON.parse(date);
@@ -30,13 +32,12 @@ const ProceedSection: React.FC = ({ amount,carId }) => {
   const totalAmount = selectedHours * amount + 1500
 
   const handleLogin = () => {
-    alert("please login to continue");
-    navigate("/login");
+    handleAlert('login','please login to continue')
+    
   };  
 
   const handleVerify = () => {
-    alert("please verify your profile to proceed");
-    navigate("/profile");
+    handleAlert('profile','please verify your profile to proceed')
   };
   
   //razor pay

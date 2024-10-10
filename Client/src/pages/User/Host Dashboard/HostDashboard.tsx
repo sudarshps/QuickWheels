@@ -14,6 +14,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { DatePickerWithRange } from "../../../components/ui/daterangepicker";
 import { DateRange } from "react-day-picker";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const HostDashboard: React.FC = () => {
   const email = useSelector((state: RootState) => state.auth.email);
@@ -24,8 +26,9 @@ const HostDashboard: React.FC = () => {
   const [images, setImages] = useState("");
   const [status, setStatus] = useState("");
   const [note,setNote] = useState("");
-  const [carDateFrom,setCarDateFrom] = useState('')
-  const [carDateTo,setCarDateTo] = useState('')
+  const [carDateFrom,setCarDateFrom] = useState<Date | null>(null)
+  const [carDateTo,setCarDateTo] = useState<Date | null>(null)
+  const [refresh,setRefresh] = useState(false)
   const [availabilityDate,setAvailabilityDate] = useState<DateRange | undefined>()
   const navigate = useNavigate();
 
@@ -42,16 +45,14 @@ const HostDashboard: React.FC = () => {
           })
           .then((res) => {
             if (res.data) {
-              const dateFrom = res.data.dateFrom.toString()
-              const dateTo = res.data.dateTo.toString()
               setCarId(res.data.id)
               setModel(res.data.model);
               setRegisterNumber(res.data.registerNumber);
               setInsuranceExp(res.data.insuranceExp);
               setImages(res.data.images[0]);
               setStatus(res.data.status);
-              setCarDateFrom(dateFrom)
-              setCarDateTo(dateTo)
+              setCarDateFrom(res.data.dateFrom)
+              setCarDateTo(res.data.dateTo)
               setNote(res.data.note)
             }
           });
@@ -59,7 +60,7 @@ const HostDashboard: React.FC = () => {
         console.error("error in fetching car details", error);
       }
     }
-  }, [email]);
+  }, [email,refresh]);
 
   const handleAvailabilitySet = () => {
 
@@ -69,10 +70,11 @@ const HostDashboard: React.FC = () => {
     axiosInstance.put('/setavailablitydate',{dateFrom,dateTo,carId})
     .then(res=>{
       if(res.data.dateUpdated){
-        alert('Date set successfully!')
+        toast.success('Date set successfully!')
+        setRefresh(prev => !prev)
       }else{
-        alert('Date was not updated!')
-
+        toast.error('Date was not updated!')
+        setRefresh(prev => !prev)
       }
     })
   }
@@ -81,6 +83,7 @@ const HostDashboard: React.FC = () => {
     <>
       <Navbar />
       <div className="flex flex-col userprofile items-center py-8 bg-gray-50 min-h-screen">
+        <ToastContainer/>
         <div className="bg-white shadow-lg rounded-lg w-full max-w-6xl p-8 mt-20">
           <div className="flex">
             <Sidebar />
@@ -121,7 +124,7 @@ const HostDashboard: React.FC = () => {
                       <span className="text-green-600">{insuranceExp}</span>
                     </p>
                     <p className="flex items-center  ">
-                      Availability: <span className="ms-2">{carDateFrom.slice(0,10)} - {carDateTo.slice(0,10)}</span>
+                      Availability: <span className="ms-2">{carDateFrom?.toString().slice(0,10)} - {carDateTo?.toString().slice(0,10)}</span>
                       
                     </p>
                     <p className="mt-4 flex">

@@ -74,7 +74,6 @@ const Navbar: React.FC<NavbarProps> = ({className}) => {
       .get("/authorized")
       .then((res) => {
         if (res.data.valid) {
-          
           const userName = res.data.user.username;
           const email = res.data.user.email;
           const profileUpdated = res.data.user.profileUpdated;
@@ -82,10 +81,14 @@ const Navbar: React.FC<NavbarProps> = ({className}) => {
           const role = res.data.user.role;          
           dispatch(setCredentials({ userName, email, profileUpdated, isHost,role }));
         } else {
-          dispatch(logOut(null));
+          dispatch(logOut(null)); 
         }
       })
-      .catch((err) => console.error(err));
+      .catch((err) => {
+        console.error(err)
+        alert(err.response.data.message)
+        navigate('/')
+      });
   }, [dispatch]);
 
 

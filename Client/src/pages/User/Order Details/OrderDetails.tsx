@@ -16,23 +16,23 @@ const orderDetails: React.FC = () => {
   const [isConfirmingCancel, setIsConfirmingCancel] = useState(false)
 
   const order = {
-    id: "CR001",
-    car: "Tesla Model 3",
+    id: "uuhqwqw123231",
+    car: "Volkswagan Polo",
     model: "2023",
-    startDate: "2023-06-01",
-    endDate: "2023-06-05",
-    pickupTime: "10:00 AM",
-    returnTime: "2:00 PM",
-    location: "San Francisco International Airport",
-    status: "Active",
-    price: 350,
-    totalDays: 5,
-    insurance: 75,
-    taxes: 40,
-    total: 465,
-    customerName: "Emma Watson",
-    customerEmail: "emma.watson@example.com",
-    customerPhone: "+1 (555) 987-6543",
+    startDate: "2024-10-13",
+    endDate: "2024-10-14",
+    // pickupTime: "10:00 AM",
+    // returnTime: "2:00 PM",
+    location: "Ramanattukara",
+    status: "Upcoming",
+    price: 5280,
+    totalDays: 1,
+    insurance: 1500,
+    // taxes: 40,
+    total: 6780,
+    customerName: "Rambo",
+    customerEmail: "bixojim178@adambra.com",
+    customerPhone: "8547596523",
   };
 
   const getStatusColor = (status: string) => {
@@ -57,13 +57,13 @@ const orderDetails: React.FC = () => {
             <header className="bg-white border-b border-gray-200">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 <div className="flex items-center justify-between">
-                  <button
+                  {/* <button
                     onClick={() => console.log("Navigate back")}
                     className="text-blue-600 hover:text-blue-800 flex items-center"
                   >
                     <ChevronLeft className="h-5 w-5 mr-1" />
                     Back to Orders
-                  </button>
+                  </button> */}
                   <h1 className="text-2xl font-bold text-gray-900">
                     Order Details
                   </h1>
@@ -110,13 +110,13 @@ const orderDetails: React.FC = () => {
                             {order.startDate} to {order.endDate}
                           </span>
                         </div>
-                        <div className="flex items-center text-gray-600">
+                        {/* <div className="flex items-center text-gray-600">
                           <ClockIcon className="mr-2 h-5 w-5" />
                           <span>
                             Pickup: {order.pickupTime} | Return:{" "}
                             {order.returnTime}
                           </span>
-                        </div>
+                        </div> */}
                         <div className="flex items-center text-gray-600">
                           <MapPinIcon className="mr-2 h-5 w-5" />
                           <span>{order.location}</span>
@@ -126,7 +126,7 @@ const orderDetails: React.FC = () => {
                   </div>
                   <div className="mt-8 border-t border-gray-200 pt-8">
                     <h2 className="text-2xl font-semibold mb-4">
-                      Price Breakdown
+                      Amount Details
                     </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
@@ -134,22 +134,22 @@ const orderDetails: React.FC = () => {
                           <span>
                             Car Rental ({order.totalDays} days)
                           </span>
-                          <span>${order.price.toFixed(2)}</span>
+                          <span>{order.price.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-gray-600 mb-2">
                           <span>Insurance</span>
-                          <span>${order.insurance.toFixed(2)}</span>
+                          <span>{order.insurance.toFixed(2)}</span>
                         </div>
-                        <div className="flex justify-between text-gray-600 mb-2">
+                        {/* <div className="flex justify-between text-gray-600 mb-2">
                           <span>Taxes and Fees</span>
                           <span>${order.taxes.toFixed(2)}</span>
-                        </div>
+                        </div> */}
                       </div>
                       <div className="bg-gray-50 p-4 rounded-lg">
                         <div className="flex justify-between items-center">
                           <span className="text-lg font-semibold">Total</span>
                           <span className="text-2xl font-bold text-green-600">
-                            ${order.total.toFixed(2)}
+                            {order.total.toFixed(2)}
                           </span>
                         </div>
                         <div className="mt-2 flex items-center text-sm text-gray-500">

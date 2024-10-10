@@ -3,7 +3,8 @@ import CarModel, { ICar } from "../models/car_model";
 import CarMake, { ICarMakeCategory } from "../models/carmake-category_model";
 import CarType, { ICarTypeCategory } from "../models/cartype-category_model";
 import OrderModel,{IOrder} from '../models/orders'
-import { Types } from "mongoose";
+import { model, Types } from "mongoose";
+import path from "path";
 
 interface UserAddress {
   address: string;
@@ -52,7 +53,8 @@ class UserRepository {
     email: string,
     carData: object,
     isVerified: boolean,
-    status: string
+    status: string,
+    isActive:boolean
   ): Promise<ICar | null> {
     try {
       const user = await User.findOne({ email });
@@ -65,6 +67,7 @@ class UserRepository {
           location: user.location,
           isVerified,
           status,
+          isActive
         });
 
         const response = await newCar.save();
@@ -192,6 +195,12 @@ class UserRepository {
   async successOrder(order:object){
     const orderData = new OrderModel(order)
     return await orderData.save()
+  }
+
+  async userOrders(userId:string){
+    return await OrderModel.find({userId:userId}).populate({path:'carId',populate:{
+      path:'make'
+    }}).exec()
   }
 }
 

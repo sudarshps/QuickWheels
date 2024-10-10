@@ -6,7 +6,7 @@ import { RootState } from "../../redux/store";
 const AdminProtectedRoute: React.FC = () => {
     const isAuthenticated = useSelector((state: RootState) => state.adminauth.token);
     const navigate = useNavigate();
-
+    
     useEffect(() => {
         if (!isAuthenticated) {
             navigate('/admin');

@@ -8,7 +8,8 @@ import './HostRegister.css'
 import axiosInstance from '../../../api/axiosInstance';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface FormData{
     make:string,
@@ -71,17 +72,17 @@ const RegisterForm = () => {
     const handleNext = async() => {
       if(currentStepIndex===0){
         if(!data.make.trim()){
-          alert('please provide make!')
+          toast.error('please provide make!')
           return
         }
 
         if(!data.carModel.trim()){
-          alert('please provide model!')
+          toast.error('please provide model!')
           return
         }
 
         if(!data.rentAmount.trim()){
-          alert('please provide rent amount!')
+          toast.error('please provide rent amount!')
           return
         }
         
@@ -89,27 +90,27 @@ const RegisterForm = () => {
       }else{
 
         if(data.images.length < 4){
-          alert('please upload 5 car images!')
+          toast.error('please upload 5 car images!')
           return
         }
 
         if(!data.registerNumber){
-          alert('please enter car register number!')
+          toast.error('please enter car register number!')
           return
         }
 
         if(!data.insuranceExp){
-          alert('please select insurance expiry date!')
+          toast.error('please select insurance expiry date!')
           return
         }
 
         if(!data.RCDoc){
-          alert('please upload RC Documents!')
+          toast.error('please upload RC Documents!')
           return
         }
 
         if(!data.InsuranceDoc){
-          alert('please select insurance Documents!')
+          toast.error('please select insurance Documents!')
           return
         }        
 
@@ -136,8 +137,10 @@ const RegisterForm = () => {
           await axiosInstance.post('/hostregister',formData)
           .then(res=>{
             if(res.data.updatedCarDetails){
-              alert('Registration completed!')
-              navigate('/')
+              toast.success('Registration completed!')
+              setTimeout(() => {
+                navigate('/')
+              }, 6000);
             }
           })
 
@@ -161,6 +164,7 @@ const RegisterForm = () => {
     <>
      <Navbar />
      <div className="formbackground min-h-screen flex flex-col items-center justify-center">
+      <ToastContainer/>
         <div className="bg-white mt-24 p-8 rounded-md shadow-md w-full md:w-1/2">
           {step}
           <div className="btn-div mt-12 flex justify-end space-x-4">

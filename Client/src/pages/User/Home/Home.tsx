@@ -22,12 +22,41 @@ const Home: React.FC = () => {
   const handleDateChange = (date:DateRange | undefined) => {
     setDate(date)
   }
+
+  const handleBookButton = () => {
+    if(!date){
+      alert('select dates!')
+      return
+    }
+    navigate('/availablecars')
+  }
   
   useEffect(()=>{
     if(date){
       sessionStorage.setItem('date',JSON.stringify(date))
     }
   },[date])
+
+  useEffect(()=>{
+    const storedLocation = sessionStorage.getItem('userlocation')
+    if(!storedLocation){
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            
+            sessionStorage.setItem('userlocation',JSON.stringify({lng,lat}))
+          },
+          (error) => {
+            console.error("Error getting user location:", error);
+          }
+        );
+      } else {
+        console.error("Geolocation is not supported by this browser.");
+      }
+    }
+  },[])
 
   return (
     <>
@@ -66,26 +95,11 @@ const Home: React.FC = () => {
               
             </div>
 
-            {/* <div className="flex items-center space-x-2 w-full md:w-auto mb-4 md:mb-0">
-              <input
-                type="date"
-                className="border-none focus:ring-0 text-sm text-gray-600 cursor-pointer w-full md:w-auto"
-                placeholder="Pick-Up Date"
-              />
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <input
-                type="date"
-                className="border-none focus:ring-0 text-sm text-gray-600 cursor-pointer appearance-none"
-                placeholder="Return Date"
-              />
-            </div> */}
             <DatePickerWithRange onDateChange={handleDateChange}/>
 
             <button
               className="bg-red-500 text-white text-sm px-2 py-2 rounded-lg hover:bg-red-600"
-              onClick={() => navigate("/availablecars")}
+              onClick={handleBookButton}
             >
               Book Your Ride
             </button>

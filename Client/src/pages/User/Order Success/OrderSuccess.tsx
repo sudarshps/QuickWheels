@@ -10,7 +10,7 @@ const OrderSuccess:React.FC = () => {
     <>
     <Navbar/>
     <div className="flex flex-col userprofile items-center py-8 bg-gray-50 min-h-screen">
-     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <Card className="w-full max-w-2xl bg-white shadow-lg">
         <CardHeader>
           <div className="text-center">
@@ -20,27 +20,27 @@ const OrderSuccess:React.FC = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="mt-6 border-t border-b border-gray-200 py-6">
+          <div className="border-t border-b border-gray-200 py-6">
             <div className="grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-6">
               <div className="flex items-center">
                 <Car className="h-6 w-6 text-red-600" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-900">Vehicle</p>
-                  <p className="text-sm text-gray-600">Tesla Model 3</p>
+                  <p className="text-sm text-gray-600">Volkswagan Polo</p>
                 </div>
               </div>
               <div className="flex items-center">
                 <Calendar className="h-6 w-6 text-red-600" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-900">Rental Period</p>
-                  <p className="text-sm text-gray-600">Oct 10 - Oct 15, 2024</p>
+                  <p className="text-sm text-gray-600">Oct 13 - Oct 14, 2024</p>
                 </div>
               </div>
               <div className="flex items-center">
                 <CreditCard className="h-6 w-6 text-red-600" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-900">Payment</p>
-                  <p className="text-sm text-gray-600">$499.00 - Paid</p>
+                  <p className="text-sm text-gray-600">6780.00 - Paid</p>
                 </div>
               </div>
               <div className="flex items-center">
@@ -48,8 +48,8 @@ const OrderSuccess:React.FC = () => {
                   #
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-900">Booking ID</p>
-                  <p className="text-sm text-gray-600">BR12345678</p>
+                  <p className="text-sm font-medium text-gray-900">Order ID</p>
+                  <p className="text-sm text-gray-600">123467</p>
                 </div>
               </div>
             </div>

@@ -23,7 +23,7 @@ export const verifyToken = (token:string): JwtPayload | void => {
     }
 }
 
-export const renewToken = (req:Request,res:Response):boolean => {
+export const renewToken = (req:Request,res:Response):string | null => {
     const refreshToken = req.cookies.refreshToken
 
     try {
@@ -39,12 +39,13 @@ export const renewToken = (req:Request,res:Response):boolean => {
                 sameSite:'strict'
             })
             req.user = payload
-            return true
+            // return true
+            return newAccessToken
 
         }        
     } catch (error) {
         console.error('error verifying refresh token',error)
     }
     
-    return false
+    return null
 }

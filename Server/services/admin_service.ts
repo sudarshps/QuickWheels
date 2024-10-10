@@ -37,6 +37,7 @@ interface HostDetails {
   status: string;
 }
 
+
 class AdminService {
   async getUsers(): Promise<IUser[] | null> {
     return await adminRepository.getUsers();
@@ -46,15 +47,18 @@ class AdminService {
     const hostDetails = await adminRepository.getHosts();
     if (!hostDetails) {
       return null;
-    }
+    }    
     return hostDetails
       .filter((host) => host.userDetails.isHost)
       .map((host) => ({
         _id: host._id,
+        
+        userId:host.userDetails._id,
         hostName: host.userDetails.name,
         email: host.userDetails.email,
         carModel: host.carModel,
         dob: host.userDetails.dob,
+        isActive:host.isActive,
         status: host.status,
       }));
   }
@@ -207,6 +211,34 @@ class AdminService {
   async updateTypeCategory(newCategory:string,categoryId:string): Promise<ICarTypeCategory | undefined | null> {
     if(typeof categoryId === "string"){
       return await adminRepository.updateTypeCategory(newCategory,categoryId)
+    }
+  }
+
+  async userStatus(status:boolean,userId:string):Promise<UserVerification | null> {
+    const response = await adminRepository.userStatus(status,userId)
+    if(!response){
+      return{
+        statusUpdated:false,
+        message:'status was not updated'
+      }
+    }
+    return{
+      statusUpdated:true,
+      message:'status updated'
+    }
+  }
+
+  async hostStatus(status:boolean,hostId:string,carId:string):Promise<UserVerification | null> {
+    const response = await adminRepository.hostStatus(status,hostId,carId)
+    if(!response){
+      return{
+        statusUpdated:false,
+        message:'status was not updated'
+      }
+    }
+    return{
+      statusUpdated:true,
+      message:'status updated'
     }
   }
 }

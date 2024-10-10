@@ -7,7 +7,7 @@ const CarListSection: React.FC = ({carListings}) => {
 
   return (
     <>
-      <section className="w-full md:w-3/4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <section className="w-full md:w-3/4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ps-4">
         {carListings.length ? (
           carListings.map((car, index) => (
             <div

@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../../../components/Admin/Navbar/AdminNavbar";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import axios from '../../../api/axios';
 import Dialog from "../../../components/Dialog/Dialog";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const HostVerification: React.FC = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const id = queryParams.get("id");
-
-  const navigate = useNavigate();
 
   interface HostDetails {
     carMake: object[];
@@ -32,7 +32,8 @@ const HostVerification: React.FC = () => {
   const [frontIsEnlarged, setFrontIsEnlarged] = useState(false);
   const [backIsEnlarged, setBackIsEnlarged] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  
+  const [refresh,setRefresh] = useState(false)
+
 
   useEffect(() => {
     axios
@@ -44,7 +45,7 @@ const HostVerification: React.FC = () => {
       .then((res) => {        
         setHostDetails(res.data);
       });
-  }, [id]);
+  }, [id,refresh]);
 
   const handleProceed = (status: string, reasonNote: string) => {
     let hostStatus = "Verified";
@@ -58,11 +59,30 @@ const HostVerification: React.FC = () => {
       .post("/verifyhost", { hostStatus, id, note })
       .then((res) => {
         if (res.data.statusUpdated) {
-          alert("status updated!");
-          navigate("/admin/userlist");
+          toast.success('status updated', {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light"
+        });
+          setRefresh(prev => !prev)
         } else {
-          alert("status updated!");
-          navigate("/admin/userlist");
+          toast.success('status updated', {
+            position: "top-right",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light"
+            });
+          
+            setRefresh(prev => !prev)
         }
       });
   };
@@ -79,6 +99,7 @@ const HostVerification: React.FC = () => {
           <h2 className="text-white text-xl md:text-2xl font-semibold">
             Host Verification
           </h2>
+          <ToastContainer/>
         </div>
         <div className="bg-gradient-to-br from-[#10114f] to-[#1416b5] rounded-md shadow-lg w-full max-w-3xl p-8 mx-auto space-y-8">
           {/* <div className="flex items-center space-x-6 ml-28">

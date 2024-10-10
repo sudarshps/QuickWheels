@@ -1,6 +1,6 @@
-import React,{useState} from 'react'
+import React,{useEffect, useState} from 'react'
 import Navbar from '../../../components/User/Navbar/Navbar'
-import { CalendarIcon, CarIcon, MapPinIcon, ChevronRightIcon } from 'lucide-react'
+import { CalendarIcon, MapPinIcon, ChevronRightIcon } from 'lucide-react'
 import { Button } from "../../../components/ui/button"
 import {
   Select,
@@ -19,23 +19,18 @@ import {
   TableRow,
 } from "../../../components/ui/table"
 import { useNavigate } from 'react-router-dom'
+import axiosInstance from '../../../api/axiosInstance'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../../redux/store'
 
-const orderslist = [
-    { id: 'CR001', car: 'Toyota Camry', startDate: '2023-06-01', endDate: '2023-06-05', location: 'New York City', status: 'Active', price: 250 },
-    { id: 'CR002', car: 'Honda Civic', startDate: '2023-06-10', endDate: '2023-06-12', location: 'Los Angeles', status: 'Upcoming', price: 180 },
-    { id: 'CR003', car: 'Ford Mustang', startDate: '2023-05-15', endDate: '2023-05-18', location: 'Miami', status: 'Completed', price: 300 },
-    { id: 'CR004', car: 'Chevrolet Malibu', startDate: '2023-06-20', endDate: '2023-06-25', location: 'Chicago', status: 'Upcoming', price: 275 },
-    { id: 'CR005', car: 'Tesla Model 3', startDate: '2023-05-01', endDate: '2023-05-03', location: 'San Francisco', status: 'Completed', price: 400 },
-  ]
 
 const Orders:React.FC = () => {
+    const userId = useSelector((state:RootState)=>state.userDetails.userId) as string
     const [filter, setFilter] = useState('all')
     const navigate = useNavigate()
+    const[orders,setOrders] = useState([])
 
-    const filteredOrders = orderslist.filter(order => {
-        if (filter === 'all') return true
-        return order.status.toLowerCase() === filter
-      })
+    
     
       const getStatusColor = (status: string) => {
         switch (status.toLowerCase()) {
@@ -49,6 +44,19 @@ const Orders:React.FC = () => {
             return 'bg-gray-100 text-gray-800'
         }
       }
+
+      useEffect(()=>{
+        axiosInstance.get('/userorders',{
+          params:{
+            userId
+          }
+        })
+        .then(res=>{
+          setOrders(res.data)
+          
+        })
+      },[])
+
   return (
     <>
       <Navbar />
@@ -69,7 +77,7 @@ const Orders:React.FC = () => {
           </SelectContent>
         </Select>
       </div>
-      <div className="overflow-x-auto">
+      {orders.length?<div className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -82,49 +90,51 @@ const Orders:React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredOrders.map((order) => (
-              <TableRow key={order.id}>
-                <TableCell>
-                  <div className="font-medium">{order.car}</div>
-                  <div className="text-sm text-muted-foreground">Order ID: {order.id}</div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center">
-                    <CalendarIcon className="mr-2 h-4 w-4 opacity-70" />
-                    <span className="text-sm">
-                      {order.startDate} to {order.endDate}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center">
-                    <MapPinIcon className="mr-2 h-4 w-4 opacity-70" />
-                    <span className="text-sm">{order.location}</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge className={getStatusColor(order.status)}>{order.status}</Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="font-semibold">${order.price.toFixed(2)}</div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex space-x-2">
-                    <Button variant="outline" size="sm" onClick={()=>navigate('/orderdetails')}>
-                      View Details
-                      <ChevronRightIcon className="ml-2 h-4 w-4" />
-                    </Button>
-                    {/* {order.status === 'Upcoming' && (
-                      <Button variant="destructive" size="sm">Cancel</Button>
-                    )} */}
-                  </div>
-                </TableCell>
-              </TableRow>
+            {orders.map((order,ind)=>(
+                 <TableRow key={ind}>
+                 <TableCell>
+                   <div className="font-medium">{order?.carId.make.name} {order?.carId.carModel}</div>
+                   <div className="text-sm text-muted-foreground">Order ID: {order?._id}</div>
+                 </TableCell>
+                 <TableCell>
+                   <div className="flex items-center">
+                     <CalendarIcon className="mr-2 h-4 w-4 opacity-70" />
+                     <span className="text-sm">
+                       {order?.pickUpDate.toString().slice(0,10)} to {order?.dropOffDate.toString().slice(0,10)}
+                     </span>
+                   </div>
+                 </TableCell>
+                 <TableCell>
+                   <div className="flex items-center">
+                     <MapPinIcon className="mr-2 h-4 w-4 opacity-70" />
+                     <span className="text-sm">Location</span>
+                   </div>
+                 </TableCell>
+                 <TableCell>
+                   <Badge className={getStatusColor('Upcoming')}>Upcoming</Badge>
+                 </TableCell>
+                 <TableCell>
+                   <div className="font-semibold">{order?.amount.toFixed(2)}</div>
+                 </TableCell>
+                 <TableCell>
+                   <div className="flex space-x-2">
+                     <Button variant="outline" size="sm" onClick={()=>navigate('/orderdetails')}>
+                       View Details
+                       <ChevronRightIcon className="ml-2 h-4 w-4" />
+                     </Button>
+                     {/* {order.status === 'Upcoming' && (
+                       <Button variant="destructive" size="sm">Cancel</Button>
+                     )} */}
+                   </div>
+                 </TableCell>
+               </TableRow>
             ))}
+             
+           
           </TableBody>
         </Table>
-      </div>
-      {filteredOrders.length === 0 && (
+      </div>:<h1 className='font-semibold'>No Orders Found!</h1>}
+      {orders === null && (
         <div className="text-center py-10">
           <p className="text-xl text-gray-500">No orders found</p>
         </div>

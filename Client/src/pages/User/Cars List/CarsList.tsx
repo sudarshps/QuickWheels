@@ -32,7 +32,7 @@ const CarsList: React.FC = () => {
 
   const[userSearch,setUserSearch] = useState('')
   
-  const userId = useSelector((state: RootState) => state.auth.userId)
+  const userId = useSelector((state: RootState) => state.userDetails.userId)
   
   const handleSortChange = (sort:string,transmission:string[],fuel:string[],seat:string[],distance:string[],search:string,carType:string[],carMake:string) => {    
       setSort(sort)
@@ -90,35 +90,6 @@ const CarsList: React.FC = () => {
       <Navbar className="top-0" />
       <main className="container mx-auto px-4 py-8 mt-24">
       <SearchSection onSearch={handleSearch}/>
-
-        {/* <div className="flex flex-col md:flex-row justify-between mx-12 p-4 items-center mb-8">
-          <div className="flex items-center space-x-4 mb-4 md:mb-0">
-            <span className="font-semibold">Date</span>
-            <div className="relative">
-              <FontAwesomeIcon
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                icon={faCalendar}
-              />
-              <input
-                type="text"
-                placeholder="From"
-                className="pl-10 pr-4 py-2 border border-red-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
-              />
-            </div>
-            <div className="relative">
-              <FontAwesomeIcon
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                icon={faCalendar}
-              />
-              <input
-                type="text"
-                placeholder="To"
-                className="pl-10 pr-4 py-2 border border-red-300 rounded-md focus:outline-none focus:ring-1 focus:ring-red-500"
-              />
-            </div>
-          </div>
-          
-        </div> */}
 
         <div className="flex flex-col md:flex-row mx-12 p-4">
           <FilterSection onSortChange={handleSortChange} search={searchValue}/>

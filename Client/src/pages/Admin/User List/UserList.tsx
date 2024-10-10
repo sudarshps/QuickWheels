@@ -3,6 +3,20 @@ import Navbar from "../../../components/Admin/Navbar/AdminNavbar";
 import axios from "../../../api/axios";
 import { useNavigate } from "react-router-dom";
 import Pagination from "../../../components/Pagination/Pagination";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../../../components/ui/alert-dialog";
+import { ToastContainer, toast } from 'react-toastify';
+  import 'react-toastify/dist/ReactToastify.css';
+
 
 interface User {
   _id: string;
@@ -16,6 +30,7 @@ interface User {
   drivingIDFront: string;
   drivingIDBack: string;
   isVerified: boolean;
+  isActive: boolean;
 }
 
 const UserList: React.FC = () => {
@@ -25,24 +40,26 @@ const UserList: React.FC = () => {
   const rowsPerPage = 5;
   const [endIndex, setEndIndex] = useState(rowsPerPage);
 
+  const [refresh,setRefresh] = useState(false)
+
   const handlePrev = () => {
     setStartIndex(startIndex - rowsPerPage);
     setEndIndex(endIndex - rowsPerPage);
   };
 
   const handleNext = () => {
-    setStartIndex(startIndex + rowsPerPage);
-    setEndIndex(endIndex + rowsPerPage);
+    if (endIndex < users.length) {
+      setStartIndex(startIndex + rowsPerPage);
+      setEndIndex(endIndex + rowsPerPage);
+    }
   };
 
-  const navigate = useNavigate();  
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get(
-          "/getuserlist"
-        );
+        const response = await axios.get("/getuserlist");
         if (response.data) {
           const updatedProfile = response.data.filter(
             (updated) => updated.profileUpdated === true
@@ -55,7 +72,25 @@ const UserList: React.FC = () => {
     };
 
     fetchUsers();
-  }, []);
+  }, [refresh]);
+
+
+  const handleAction = (status, userId) => {
+    const userStatus = !status;
+    axios.put("/userstatus", { status: userStatus, userId }).then((res) => {
+      toast.success(res.data.message, {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light"
+        });
+        setRefresh(prev=>!prev)
+    });
+  };
 
   return (
     <>
@@ -65,7 +100,7 @@ const UserList: React.FC = () => {
           <h2 className="text-white text-xl md:text-2xl font-semibold mb-4">
             Users
           </h2>
-
+          <ToastContainer/>
           <div className="mb-8">
             <input
               type="text"
@@ -105,6 +140,39 @@ const UserList: React.FC = () => {
                       <td className="py-3 px-2 md:px-4">
                         {user.isVerified ? `Verified` : `Not Verified`}
                       </td>
+                      <td className="py-3 px-2 md:px-4">
+                        <button
+                          className={
+                            user.isActive
+                              ? `bg-red-500 rounded-md px-3 py-1`
+                              : `bg-green-500 rounded-md px-3 py-1`
+                          }
+                        >
+                          <AlertDialog>
+                            <AlertDialogTrigger>
+                              {user.isActive ? "Block" : "Unblock"}
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Are you sure want to{" "}
+                                  {user.isActive ? `block` : `unblock`} user?
+                                </AlertDialogTitle>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() =>
+                                    handleAction(user.isActive, user._id)
+                                  }
+                                >
+                                  Yes
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </button>
+                      </td>
                       <td
                         className="py-3 px-2 md:px-4 text-blue-300 hover:underline cursor-pointer"
                         onClick={() =>
@@ -123,16 +191,22 @@ const UserList: React.FC = () => {
               <p className="text-white">No Recored Found!</p>
             </div>
           )}
-          <Pagination
-            dataLength={users.length}
-            startIndex={startIndex}
-            endIndex={endIndex}
-            prev={handlePrev}
-            next={handleNext}
-            textColor={"text-white mt-3"}
-          />
+          {users.length > rowsPerPage ? (
+            <Pagination
+              dataLength={users.length}
+              startIndex={startIndex}
+              endIndex={endIndex}
+              prev={handlePrev}
+              next={handleNext}
+              textColor={"text-white mt-3"}
+            />
+          ) : (
+            ""
+          )}
         </div>
       </div>
+
+      
     </>
   );
 };

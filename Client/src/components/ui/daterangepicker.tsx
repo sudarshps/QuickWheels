@@ -24,11 +24,11 @@ export function DatePickerWithRange({
   onDateChange
 }: DateProps) {
   const [date, setDate] = React.useState<DateRange | undefined>(
-  //   {
-  //   from:new Date(2024, 9, 10),
-  //   to:addDays(new Date(2024, 9, 20), 20),
-  // }
-  undefined
+    {
+    from:new Date(),
+    to:addDays(new Date(), 20),
+  }
+  
 )
 
   useEffect(()=>{

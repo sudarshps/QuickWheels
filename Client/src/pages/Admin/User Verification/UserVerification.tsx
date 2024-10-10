@@ -5,6 +5,8 @@ import { faUser } from "@fortawesome/free-solid-svg-icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import Dialog from "../../../components/Dialog/Dialog";
 import axios from '../../../api/axios';
+import { ToastContainer, toast } from 'react-toastify';
+  import 'react-toastify/dist/ReactToastify.css';
 
 const UserVerification: React.FC = () => {
   const location = useLocation();
@@ -30,6 +32,7 @@ const UserVerification: React.FC = () => {
   const [frontIsEnlarged, setFrontIsEnlarged] = useState(false);
   const [backIsEnlarged, setBackIsEnlarged] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [refresh,setRefresh] = useState(false)
 
   useEffect(() => {
     axios
@@ -39,7 +42,7 @@ const UserVerification: React.FC = () => {
         },
       })
       .then((res) => setUserDetails(res.data));
-  }, [id]);
+  }, [id,refresh]);
 
   const handleProceed = (status: string, reasonNote:string) => {
     let userStatus = "Verified"
@@ -53,11 +56,30 @@ const UserVerification: React.FC = () => {
         .post("/verifyuser", { userStatus, id,note })
         .then((res) => {
           if (res.data.statusUpdated) {
-            alert("status updated!");
-            navigate("/admin/userlist");
+            toast.success('status updated', {
+              position: "top-right",
+              autoClose: 2000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "light"
+              });
+              setRefresh(prev => !prev)
           }else{
-            alert("status updated!");
-            navigate("/admin/userlist");
+            toast.success('status updated', {
+              position: "top-right",
+              autoClose: 2000,
+              hideProgressBar: false,
+              closeOnClick: true,
+              pauseOnHover: true,
+              draggable: true,
+              progress: undefined,
+              theme: "light"
+              });
+              setRefresh(prev => !prev)
+
           }
         });
   };
@@ -75,6 +97,8 @@ const UserVerification: React.FC = () => {
             User Verification
           </h2>
         </div>
+        <ToastContainer/>
+
         <div className="bg-gradient-to-br from-[#10114f] to-[#1416b5] rounded-md shadow-lg w-full max-w-3xl p-8 mx-auto space-y-8">
           <div className="flex items-center space-x-6 ml-28">
             <div className="w-24 h-24 rounded-full bg-gray-200 flex justify-center items-center">
@@ -157,7 +181,7 @@ const UserVerification: React.FC = () => {
             </button>
             <button
               className={`bg-blue-500 ${!userDetails?.isVerified?`hover:bg-blue-600`:``} text-white font-bold py-2 px-4 rounded`}
-              onClick={() => handleProceed("approve")}
+              onClick={() => handleProceed("approve",'')}
               disabled={userDetails?.isVerified?true:false}
             >
               {userDetails?.isVerified?`Approved`:`Approve`}
