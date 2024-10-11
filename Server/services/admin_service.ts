@@ -19,7 +19,8 @@ interface UserVerification {
 }
 
 interface CategoryResponseType {
-  categoryAdded: boolean;
+  categoryAdded?: boolean;
+  categoryRemoved?: boolean;
   message: string;
 }
 
@@ -153,8 +154,28 @@ class AdminService {
     };
   }
 
-  async addTypeCategory(newCategory: string): Promise<CategoryResponseType> {
-    const response = await adminRepository.addTypeCategory(newCategory);
+  async addTypeCategory(newCategory: string): Promise<CategoryResponseType | null> {
+    const exist = await adminRepository.findTypeCategory(newCategory)
+    if(!exist){
+      const response = await adminRepository.addTypeCategory(newCategory);
+      if (!response) {
+        return {
+          categoryAdded: false,
+          message: "Category was not added",
+        };
+      }
+      return {
+        categoryAdded: true,
+        message: "category added successfully",
+      };
+    }
+    return null 
+  }
+
+  async addMakeCategory(newCategory: string): Promise<CategoryResponseType | null> {
+    const exist = await adminRepository.findMakeCategory(newCategory)
+    if(!exist){
+      const response = await adminRepository.addMakeCategory(newCategory);
     if (!response) {
       return {
         categoryAdded: false,
@@ -165,53 +186,106 @@ class AdminService {
       categoryAdded: true,
       message: "category added successfully",
     };
+    }
+    return null
+    
   }
 
-  async addMakeCategory(newCategory: string): Promise<CategoryResponseType> {
-    const response = await adminRepository.addMakeCategory(newCategory);
-    if (!response) {
-      return {
-        categoryAdded: false,
-        message: "Category was not added",
-      };
-    }
+  async makeCategory(page:number,dataSize:number): Promise<{totalPages:number,data:ICarMakeCategory[]}> {
+    let response = await adminRepository.makeCategory();
+    const startIndex = (page-1) * dataSize 
+    const endIndex = page * dataSize 
+    const totalPages = Math.ceil(response.length/dataSize)
+    response = response.slice(startIndex,endIndex)
     return {
-      categoryAdded: true,
-      message: "category added successfully",
-    };
+      totalPages,
+      data:response
+    }
   }
 
-  async makeCategory(): Promise<ICarMakeCategory[]> {
-    return await adminRepository.makeCategory();
+  async typeCategory(page:number,dataSize:number): Promise<{totalPages:number,data:ICarMakeCategory[]}> {
+    let response = await adminRepository.typeCategory()
+    const startIndex = (page-1) * dataSize
+    const endIndex = page * dataSize
+    const totalPages = Math.ceil(response.length/dataSize)
+    response = response.slice(startIndex,endIndex)
+    return {
+      totalPages,
+      data:response
+    }
   }
 
-  async typeCategory(): Promise<ICarTypeCategory[]> {
-    return await adminRepository.typeCategory();
-  }
-
-  async removeMakeCategory(categoryId: string): Promise<ICarMakeCategory | undefined> {
+  async removeMakeCategory(categoryId: string): Promise<CategoryResponseType | undefined> {
     if (typeof categoryId === "string") {
-      return await adminRepository.removeMakeCategory(categoryId);
-      
+      const response = await adminRepository.removeMakeCategory(categoryId);
+      if(!response){
+        return{
+          categoryRemoved:false,
+          message:'category was not removed'
+        }
+      }
+      return{
+        categoryRemoved:true,
+        message:'category removed successfully'
+      }
     }
   }
 
-  async removeTypeCategory(categoryId: string): Promise<ICarMakeCategory | undefined> {
+  async removeTypeCategory(categoryId: string): Promise<CategoryResponseType | undefined> {
     if (typeof categoryId === "string") {
-      return await adminRepository.removeTypeCategory(categoryId);
+      const response = await adminRepository.removeTypeCategory(categoryId);
+      if(!response){
+        return{
+          categoryRemoved:false,
+          message:'category was not removed'
+        }
+      }
+      return{
+        categoryRemoved:true,
+        message:'category removed successfully'
+      }
     }
   }
 
-  async updateMakeCategory(newCategory:string,categoryId:string): Promise<ICarMakeCategory | undefined | null> {
-    if(typeof categoryId === "string"){
-      return await adminRepository.updateMakeCategory(newCategory,categoryId)
+  async updateMakeCategory(newCategory:string,categoryId:string): Promise<CategoryResponseType | undefined | null> {
+    const exist = await adminRepository.findMakeCategory(newCategory)
+    if(!exist){
+      if(typeof categoryId === "string"){
+        const response = await adminRepository.updateMakeCategory(newCategory,categoryId)
+        if(!response){
+          return{
+            categoryAdded:false,
+            message:'category was not edited'
+          }
+        }
+        return{
+          categoryAdded:true,
+          message:'category edited successfully!'
+        }
+      }
     }
+    return null
+    
   }
 
-  async updateTypeCategory(newCategory:string,categoryId:string): Promise<ICarTypeCategory | undefined | null> {
-    if(typeof categoryId === "string"){
-      return await adminRepository.updateTypeCategory(newCategory,categoryId)
+  async updateTypeCategory(newCategory:string,categoryId:string): Promise<CategoryResponseType | undefined | null> {
+    const exist = await adminRepository.findTypeCategory(newCategory)
+    if(!exist){
+      if(typeof categoryId === "string"){
+        const response = await adminRepository.updateTypeCategory(newCategory,categoryId)
+        if(!response){
+          return{
+            categoryAdded:false,
+            message:'category was not edited'
+          }
+        }
+        return{
+          categoryAdded:true,
+          message:'category edited successfully!'
+        }
+      }
     }
+    return null
   }
 
   async userStatus(status:boolean,userId:string):Promise<UserVerification | null> {

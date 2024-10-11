@@ -114,7 +114,11 @@ class AdminController {
 
   async makeCategory(req: Request, res: Response): Promise<void> {
     try {
-      const makeCategory = await AdminService.makeCategory();
+      const { page } = req.query;
+      const dataSize = 5;
+      const pageNum = Number(page);
+      const makeCategory = await AdminService.makeCategory(pageNum, dataSize);
+
       res.json(makeCategory);
     } catch (error) {
       console.error("error in getting category", error);
@@ -123,7 +127,10 @@ class AdminController {
 
   async typeCategory(req: Request, res: Response): Promise<void> {
     try {
-      const typeCategory = await AdminService.typeCategory();
+      const { page } = req.query;
+      const dataSize = 5;
+      const pageNum = Number(page);
+      const typeCategory = await AdminService.typeCategory(pageNum, dataSize);
       res.json(typeCategory);
     } catch (error) {
       console.error("error in getting category", error);
@@ -135,10 +142,7 @@ class AdminController {
       const { categoryId } = req.query;
       if (typeof categoryId === "string") {
         const response = await AdminService.removeMakeCategory(categoryId);
-        if (!response) {
-          res.json({ removed: false, message: "category was not removed" });
-        }
-        res.json({ removed: true, message: "category removed" });
+        res.json(response);
       }
     } catch (error) {
       console.error("error in deleting category", error);
@@ -150,62 +154,56 @@ class AdminController {
       const { categoryId } = req.query;
       if (typeof categoryId === "string") {
         const response = await AdminService.removeTypeCategory(categoryId);
-        if (!response) {
-          res.json({ removed: false, message: "category was not removed" });
-        }
-        res.json({ removed: true, message: "category removed" });
+        res.json(response);
       }
     } catch (error) {
       console.error("error in deleting category", error);
     }
   }
 
-  async updateMakeCategory(req:Request,res:Response):Promise<void> {
+  async updateMakeCategory(req: Request, res: Response): Promise<void> {
     try {
-        const {newCategory,categoryId} = req.body
-        const response = await AdminService.updateMakeCategory(newCategory,categoryId)
-        if (!response) {
-            res.json({ updated: false, message: "category was not updated" });
-          }
-          res.json({ updated: true, message: "category updated" });
+      const { newCategory, categoryId } = req.body;
+      const response = await AdminService.updateMakeCategory(
+        newCategory,
+        categoryId
+      );
+      res.json(response);
     } catch (error) {
-        console.error('error in updating category',error);
+      console.error("error in updating category", error);
     }
   }
 
-  async updateTypeCategory(req:Request,res:Response):Promise<void> {
+  async updateTypeCategory(req: Request, res: Response): Promise<void> {
     try {
-        const {newCategory,categoryId} = req.body
-        const response = await AdminService.updateTypeCategory(newCategory,categoryId)
-        if (!response) {
-            res.json({ updated: false, message: "category was not updated" });
-          }
-          res.json({ updated: true, message: "category updated" });
+      const { newCategory, categoryId } = req.body;
+      const response = await AdminService.updateTypeCategory(
+        newCategory,
+        categoryId
+      );
+      res.json(response);
     } catch (error) {
-        console.error('error in updating category',error);
+      console.error("error in updating category", error);
     }
   }
 
-  async userStatus(req:Request,res:Response):Promise<void> {
+  async userStatus(req: Request, res: Response): Promise<void> {
     try {
-      const {status,userId} = req.body      
-      const response = await AdminService.userStatus(status,userId)
-      res.json(response)
-      
+      const { status, userId } = req.body;
+      const response = await AdminService.userStatus(status, userId);
+      res.json(response);
     } catch (error) {
-      console.error('error in updating user block/unblock',error);
-      
+      console.error("error in updating user block/unblock", error);
     }
   }
 
-  async hostStatus(req:Request,res:Response):Promise<void> {
+  async hostStatus(req: Request, res: Response): Promise<void> {
     try {
-      const {status,hostId,carId} = req.body
-      const response = await AdminService.hostStatus(status,hostId,carId)
-      res.json(response)
+      const { status, hostId, carId } = req.body;
+      const response = await AdminService.hostStatus(status, hostId, carId);
+      res.json(response);
     } catch (error) {
-      console.error('error in updating host status',error);
-      
+      console.error("error in updating host status", error);
     }
   }
 }

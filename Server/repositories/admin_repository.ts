@@ -65,10 +65,18 @@ class AdminRepository {
     return response?.status
   }
 
+  async findTypeCategory(newCategory:string):Promise<ICarTypeCategory | null> {
+    return await CarType.findOne({name:newCategory})
+  }
+
   async addTypeCategory(newCategory:string):Promise<ICarTypeCategory> {
     const carType = new CarType({name:newCategory})
 
     return await carType.save();
+  }
+
+  async findMakeCategory(newCategory:string):Promise<ICarMakeCategory | null> {
+    return await CarMake.findOne({name:newCategory})
   }
 
   async addMakeCategory(newCategory:string):Promise<ICarMakeCategory> {
