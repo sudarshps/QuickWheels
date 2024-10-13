@@ -88,7 +88,7 @@ class UserRepository {
     }
   }
 
-  async getCarDetails(email: string): Promise<ICar | null> {
+  async getCarDetails(email: string): Promise<ICar[] | null> {
     try {
       const user = await User.findOne({ email });
       if (!user) {
@@ -96,7 +96,7 @@ class UserRepository {
         return null;
       }
 
-      const carDetails = await CarModel.findOne({ userId: user._id });
+      const carDetails = await CarModel.find({ userId: user._id });
 
       if (!carDetails) {
         console.error("Car details not found for user:", user._id);
@@ -201,6 +201,10 @@ class UserRepository {
     return await OrderModel.find({userId:userId}).populate({path:'carId',populate:{
       path:'make'
     }}).exec()
+  }
+
+  async reserveCar(carId:string,toDate:Date,fromDate:Date){
+    return await CarModel.findByIdAndUpdate(carId,{reservedDateFrom:fromDate,reservedDateTo:toDate})
   }
 }
 

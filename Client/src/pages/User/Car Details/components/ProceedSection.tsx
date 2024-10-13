@@ -18,7 +18,7 @@ const ProceedSection: React.FC = ({ amount,carId,handleAlert }) => {
       const hourDiff = (toDate - fromDate) / (1000 * 60 * 60);
       setSelectedHours(hourDiff);
     }
-  }, []);
+  }, []);  
   const username = useSelector((state:RootState) => state.auth.user) as string
   const email = useSelector((state: RootState) => state.auth.email) as string
   const userId = useSelector((state:RootState) => state.userDetails.userId) as string
@@ -29,7 +29,7 @@ const ProceedSection: React.FC = ({ amount,carId,handleAlert }) => {
   const phone = useSelector((state:RootState)=>state.userDetails.phone) as string
   const navigate = useNavigate();
 
-  const totalAmount = selectedHours * amount + 1500
+  const totalAmount = Math.ceil(selectedHours * amount + 1500)
 
   const handleLogin = () => {
     handleAlert('login','please login to continue')

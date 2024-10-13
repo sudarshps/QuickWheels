@@ -44,7 +44,7 @@ export function DatePickerWithRange({
 
 
   useEffect(()=>{
-    onDateChange(date)
+      onDateChange(date)
   },[date,onDateChange])
   
 

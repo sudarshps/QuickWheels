@@ -25,7 +25,7 @@ const CarDetails: React.FC = () => {
   const [address, setAddress] = useState("");
   const [amount, setAmount] = useState<number | null>(null);
   const [message, setMessage] = useState();
-
+  
   useEffect(() => {
     axiosInstance
       .get("/cardetails", {
@@ -33,7 +33,7 @@ const CarDetails: React.FC = () => {
           id,
         },
       })
-      .then((res) => {
+      .then((res) => {        
         setCarImages(res.data.images);
         setAddress(res.data.address);
         setMake(res.data.carMake[0].name);

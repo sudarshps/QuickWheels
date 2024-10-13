@@ -30,6 +30,8 @@ export interface ICar extends Document{
     status:string,
     availabilityFrom:Date,
     availabilityTo:Date,
+    reservedDateFrom:Date,
+    reservedDateTo:Date,
     note:string,
     isActive:boolean,
     images:[string]
@@ -64,6 +66,8 @@ const carSchema:Schema<ICar> = new Schema({
     status:{type:String,required:true},
     availabilityFrom:{type:Date},
     availabilityTo:{type:Date},
+    reservedDateFrom:{type:Date},
+    reservedDateTo:{type:Date},
     note:{type:String},
     isActive:{type:Boolean},
     images:{type:[String],required:true}

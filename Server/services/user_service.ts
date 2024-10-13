@@ -254,31 +254,16 @@ class UserService {
     };
   }
 
-  async getCarDetails(email: string): Promise<CarDetails> {
+  async getCarDetails(email: string): Promise<ICar[] | null> {
     const carDetails = await userRepository.getCarDetails(email);
 
-    if (carDetails) {
-      return {
-        carDetails: true,
-        id:carDetails._id,
-        model: carDetails.carModel,
-        registerNumber: carDetails.registerNumber,
-        insuranceExp: carDetails.insuranceExp,
-        images: carDetails.images,
-        status: carDetails.status,
-        note: carDetails.note,
-        dateFrom:carDetails.availabilityFrom,
-        dateTo:carDetails.availabilityTo,
-        message: "Car Details Created",
-      };
+    if (!carDetails) {
+      return null
     }
 
-    return {
-      carDetails: false,
-      message: "Car Details Creation failed",
-    };
+    return carDetails
   }
-
+  
   async rentCarDetails(
     userId:string,
     sort: string,
@@ -304,12 +289,12 @@ class UserService {
     if (carDetails && searchInput.trim()) {
       const regex = new RegExp(searchInput, "i");
       carDetails = carDetails?.filter((car) => {
-        const carTypeName =
-          typeof car.carType === "object" && "name" in car.carType
+        const carTypeName = 
+          car.carType && typeof car.carType === "object" && "name" in car.carType
             ? car.carType.name
             : ""; 
         const carMakeName = 
-          typeof car.make === 'object' && 'name' in car.make 
+          car.make && typeof car.make === 'object' && 'name' in car.make 
             ? car.make.name
             : "";    
                          
@@ -336,8 +321,10 @@ class UserService {
           const from = new Date(dateFrom)
           const to = new Date(dateTo) 
           
+          const isAvailable = to<car.reservedDateFrom || from > car.reservedDateTo
+          
           return(
-            from>=car.availabilityFrom && to<=car.availabilityTo
+            isAvailable && from>=car.availabilityFrom && to<=car.availabilityTo 
           )
         })
     }    
@@ -444,6 +431,13 @@ class UserService {
     }
     const response = await userRepository.successOrder(order)
     if(!response){
+      return{
+        successOrder:false,
+        message:'failed to create order'
+      }
+    }
+    const reserveCar = await userRepository.reserveCar(carId,toDate,fromDate)
+    if(!reserveCar){
       return{
         successOrder:false,
         message:'failed to create order'

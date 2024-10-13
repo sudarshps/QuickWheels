@@ -14,27 +14,25 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { DatePickerWithRange } from "../../../components/ui/daterangepicker";
 import { DateRange } from "react-day-picker";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 const HostDashboard: React.FC = () => {
   const email = useSelector((state: RootState) => state.auth.email);
-  const [carId, setCarId] = useState('')
-  const [model, setModel] = useState("");
-  const [registerNumber, setRegisterNumber] = useState("");
-  const [insuranceExp, setInsuranceExp] = useState("");
-  const [images, setImages] = useState("");
-  const [status, setStatus] = useState("");
-  const [note,setNote] = useState("");
-  const [carDateFrom,setCarDateFrom] = useState<Date | null>(null)
-  const [carDateTo,setCarDateTo] = useState<Date | null>(null)
-  const [refresh,setRefresh] = useState(false)
-  const [availabilityDate,setAvailabilityDate] = useState<DateRange | undefined>()
+  const [refresh, setRefresh] = useState(false);
+  const [availabilityDate, setAvailabilityDate] = useState<
+    DateRange | undefined
+  >();
   const navigate = useNavigate();
+  const [cars, setCars] = useState([]);
 
-  const handleDate = (date:DateRange | undefined) => {
-    setAvailabilityDate(date)
-  }  
+  const handleDate = (date: DateRange | undefined) => {
+    
+    setAvailabilityDate(date);
+    console.log(availabilityDate,'date');
+
+  };
 
   useEffect(() => {
     if (email) {
@@ -45,106 +43,131 @@ const HostDashboard: React.FC = () => {
           })
           .then((res) => {
             if (res.data) {
-              setCarId(res.data.id)
-              setModel(res.data.model);
-              setRegisterNumber(res.data.registerNumber);
-              setInsuranceExp(res.data.insuranceExp);
-              setImages(res.data.images[0]);
-              setStatus(res.data.status);
-              setCarDateFrom(res.data.dateFrom)
-              setCarDateTo(res.data.dateTo)
-              setNote(res.data.note)
+              setCars(res.data);
             }
           });
       } catch (error) {
         console.error("error in fetching car details", error);
       }
     }
-  }, [email,refresh]);
+  }, [email, refresh]);
 
-  const handleAvailabilitySet = () => {
-
-    const dateFrom = availabilityDate?.from
-    const dateTo = availabilityDate?.to
-
-    axiosInstance.put('/setavailablitydate',{dateFrom,dateTo,carId})
-    .then(res=>{
-      if(res.data.dateUpdated){
-        toast.success('Date set successfully!')
-        setRefresh(prev => !prev)
-      }else{
-        toast.error('Date was not updated!')
-        setRefresh(prev => !prev)
-      }
-    })
-  }
+  const handleAvailabilitySet = (action:string,carId:string) => {
+    let dateFrom = null;
+    let dateTo = null;
+    if (action === "list") {
+      dateFrom = availabilityDate?.from;
+      dateTo = availabilityDate?.to;
+    }
+    
+    axiosInstance
+      .put("/setavailablitydate", { dateFrom, dateTo, carId })
+      .then((res) => {
+        if (res.data.dateUpdated) {
+          toast.success("Date set successfully!");
+          setRefresh((prev) => !prev);
+        } else {
+          toast.error("Date was not updated!");
+          setRefresh((prev) => !prev);
+        }
+      });
+  };
 
   return (
     <>
       <Navbar />
       <div className="flex flex-col userprofile items-center py-8 bg-gray-50 min-h-screen">
-        <ToastContainer/>
+        <ToastContainer />
         <div className="bg-white shadow-lg rounded-lg w-full max-w-6xl p-8 mt-20">
           <div className="flex">
             <Sidebar />
             <div className="w-3/4 p-6">
               <h2 className="text-2xl font-bold text-gray-800 mb-5">My Cars</h2>
-              <div className="relative p-6 bg-white shadow rounded">
-                <span className="absolute top-2 right-2 text-gray-700 px-2 py-1 rounded">
-                  {status === "Verification Pending" ? (
-                    <div className="text-gray-500">
-                      <FontAwesomeIcon icon={faClock} />
-                      {status}
-                    </div>
-                  ) : status === "Verified" ? (
-                    <div className="text-green-500">
-                      <FontAwesomeIcon icon={faCircleCheck} />
-                      {status}
-                    </div>
-                  ) : (
-                    <Tooltip content={note} elements={<div className="text-red-500">
-                      <FontAwesomeIcon icon={faCircleXmark} />
-                      {status}
-                    </div>}/>
-                  )}
+              {cars.length &&
+                cars.map((car) => (
+                  <div className="relative p-6 bg-white shadow rounded mb-5">
+                    <span className="absolute top-2 right-2 text-gray-700 px-2 py-1 rounded">
+                      {car.status === "Verification Pending" ? (
+                        <div className="text-gray-500">
+                          <FontAwesomeIcon icon={faClock} />
+                          {car.status}
+                        </div>
+                      ) : car.status === "Verified" ? (
+                        <div className="text-green-500">
+                          <FontAwesomeIcon icon={faCircleCheck} />
+                          {car.status}
+                        </div>
+                      ) : (
+                        <Tooltip
+                          content={car.note}
+                          elements={
+                            <div className="text-red-500">
+                              <FontAwesomeIcon icon={faCircleXmark} />
+                              {car.status}
+                            </div>
+                          }
+                        />
+                      )}
+                    </span>
 
-                </span>
+                    <div className="flex">
+                      <img
+                        src={`http://localhost:3000/${car.images[0]}`}
+                        alt="Car"
+                        className="w-40 h-24 object-cover rounded"
+                      />
+                      <div className="ml-4">
+                        <h3 className="text-xl font-bold">
+                          {car.registerNumber}
+                        </h3>
+                        <p className="text-lg font-semibold">{car.carModel}</p>
+                        <p>
+                          Insurance:{" "}
+                          <span className="text-green-600">
+                            {car.insuranceExp}
+                          </span>
+                        </p>
+                        <p className="flex items-center  ">
+                          Availability:{" "}
+                          <span className="ms-2">
+                            {car.availabilityFrom?.toString().slice(0, 10)} -{" "}
+                            {car.availabilityTo?.toString().slice(0, 10)}
+                          </span>
+                        </p>
+                        <p className="mt-4 flex">
+                          <span>
+                            <DatePickerWithRange onDateChange={handleDate} />
+                          </span>
+                          <button
+                            className="bg-yellow-500 text-white px-4 py-2 ms-2 text-sm rounded mr-2"
+                            onClick={() => handleAvailabilitySet("list",car._id)}
+                          >
+                            List
+                          </button>
 
-                <div className="flex">
-                  <img
-                    src={`http://localhost:3000/${images}`}
-                    alt="Car"
-                    className="w-40 h-24 object-cover rounded"
-                  />
-                  <div className="ml-4">
-                    <h3 className="text-xl font-bold">{registerNumber}</h3>
-                    <p className="text-lg font-semibold">{model}</p>
-                    <p>
-                      Insurance:{" "}
-                      <span className="text-green-600">{insuranceExp}</span>
-                    </p>
-                    <p className="flex items-center  ">
-                      Availability: <span className="ms-2">{carDateFrom?.toString().slice(0,10)} - {carDateTo?.toString().slice(0,10)}</span>
-                      
-                    </p>
-                    <p className="mt-4 flex">
-                      <span><DatePickerWithRange onDateChange={handleDate}/></span>
-                      <button className="bg-yellow-500 text-white px-4 py-2 ms-2 text-sm rounded mr-2" onClick={handleAvailabilitySet}>
-                    Set 
-                  </button>
-                    </p>
-                    
+                          {car.availabilityFrom ? (
+                            <button
+                              className="bg-yellow-500 text-white px-4 py-2 ms-2 text-sm rounded mr-2"
+                              onClick={() => handleAvailabilitySet("unlist",car._id)}
+                            >
+                              Unlist
+                            </button>
+                          ) : (
+                            ""
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex mt-4">
+                      <button
+                        className="bg-red-500 text-white px-4 py-2 rounded"
+                        onClick={() => navigate("/editcardetails")}
+                      >
+                        View Details
+                      </button>
+                    </div>
                   </div>
-                </div>
-                <div className="flex mt-4">
-                  <button
-                    className="bg-red-500 text-white px-4 py-2 rounded"
-                    onClick={() => navigate("/editcardetails")}
-                  >
-                    View Details
-                  </button>
-                </div>
-              </div>
+                ))}
             </div>
           </div>
         </div>

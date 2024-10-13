@@ -1,14 +1,25 @@
-import React from "react";
+import React, { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { BlinkBlur } from "react-loading-indicators";
 
-
-const CarListSection: React.FC = ({carListings}) => {
+const CarListSection: React.FC = ({ carListings }) => {
   const navigate = useNavigate();
+  const [loading,setLoading] = useState(true)
 
+  
+  useEffect(()=>{    
+    setTimeout(() => {
+        setLoading(false)
+    }, 2000);
+    return ()=> {
+      setLoading(true)
+    }
+  },[carListings])
+  
   return (
     <>
       <section className="w-full md:w-3/4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ps-4">
-        {carListings.length ? (
+        {carListings.length? (
           carListings.map((car, index) => (
             <div
               key={index}
@@ -26,19 +37,31 @@ const CarListSection: React.FC = ({carListings}) => {
                   {car.transmission} · {car.fuel} · {car.seatCapacity}
                 </p>
                 <div className="grid grid-cols-2 items-center">
-                  <div className="text-2xl font-bold">
-                    ₹{car.rentAmount}/hr
-                  </div>
-                  {sessionStorage.getItem('userlocation')?<div className="text-right">
-                    <span className="text-xl mr-1 font-semibold">{Math.floor(car.distance/1000)}</span><span className="text-gray-600 text-sm ">KM away</span>
-                  </div>:''}
+                  <div className="text-2xl font-bold">₹{car.rentAmount}/hr</div>
+                  {sessionStorage.getItem("userlocation") ? (
+                    <div className="text-right">
+                      <span className="text-xl mr-1 font-semibold">
+                        {Math.floor(car.distance / 1000)}
+                      </span>
+                      <span className="text-gray-600 text-sm ">KM away</span>
+                    </div>
+                  ) : (
+                    ""
+                  )}
                 </div>
               </div>
             </div>
           ))
-        ) : (
-          <h2>No cars to show!</h2>
-        )}
+        ) : 
+          loading && (<div className="flex items-center justify-center ms-96">
+            <BlinkBlur color="#ce2b2a" size="large"/>
+          </div>)} 
+
+         
+              <div className="flex items-center justify-center min-h-screen">
+              <p className="text-white">No Matching Result!</p>
+            </div>
+          
       </section>
     </>
   );

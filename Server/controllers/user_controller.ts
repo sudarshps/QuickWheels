@@ -243,7 +243,7 @@ class UserController {
       let latQuery = req.query.lat;
       let distanceValue = 0;
       const dateFrom = req.query.dateFrom as Date | undefined
-      const dateTo = req.query.dateTo as Date | undefined     
+      const dateTo = req.query.dateTo as Date | undefined           
       
       if (distance) {
         distanceValue = parseFloat(distance[0]);

@@ -16,7 +16,7 @@ import {
 } from "../../../components/ui/alert-dialog";
 import { ToastContainer, toast } from 'react-toastify';
   import 'react-toastify/dist/ReactToastify.css';
-
+import { OrbitProgress } from "react-loading-indicators";
 
 interface User {
   _id: string;
@@ -187,9 +187,12 @@ const UserList: React.FC = () => {
               </table>
             </div>
           ) : (
+            <>
+            <OrbitProgress color="#193ddf" size="medium"/>
             <div className="flex items-center justify-center">
               <p className="text-white">No Recored Found!</p>
             </div>
+            </>      
           )}
           {users.length > rowsPerPage ? (
             <Pagination
