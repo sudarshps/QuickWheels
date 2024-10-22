@@ -19,7 +19,7 @@ import CarDetails from './pages/User/Car Details/CarDetails.tsx'
 import HostVerification from './pages/Admin/Host Verification/HostVerification.tsx'
 import ForbiddenPage from './pages/User/403/ForbiddenPage.tsx'
 import Category from './pages/Admin/Category/Category.tsx'
-
+import WalletUI from './pages/User/Wallet/Wallet.tsx'
 import CarDetailsSection from './pages/User/Car Details/components/CarDetailsSection.tsx'
 
 import GuestRoute from './components/Guest Route/GuestRoute.tsx'
@@ -27,7 +27,12 @@ import Orders from './pages/User/Orders/Orders.tsx'
 import OrderDetails from './pages/User/Order Details/OrderDetails.tsx'
 import AdminOrders from './pages/Admin/Orders/AdminOrders.tsx'
 import OrderSuccess from './pages/User/Order Success/OrderSuccess.tsx'
+import AdminOrderDetails from './pages/Admin/Order Details/OrderDetails.tsx'
+import {io} from 'socket.io-client'
 
+const socket = io('http://localhost:3000',{
+  withCredentials:true
+})
 
 function App() {
   return(
@@ -49,9 +54,10 @@ function App() {
         <Route path='/becomehost' element={<HostStartup/>}/>
         <Route path='/profile' element={<Profile/>}/>
         <Route path='/hostregister' element={<RegisterForm/>}/>
-        <Route path='/orders' element={<Orders/>}/>
+        <Route path='/orders' element={<Orders socket={socket}/>}/>
         <Route path='/orderdetails' element={<OrderDetails/>}/>
         <Route path='/orderplaced' element={<OrderSuccess/>}/>
+        <Route path='/mywallet' element={<WalletUI/>}/>
         </Route>
         <Route element={<ProtectedRoute allowedRoles={['HOST']}/>}>
         <Route path='/hostdashboard' element={<HostDashboard/>}/>
@@ -68,6 +74,7 @@ function App() {
         <Route path='/admin/hostverification' element={<HostVerification/>}/>
         <Route path='/admin/category' element={<Category/>}/>
         <Route path='/admin/orders' element={<AdminOrders/>}/>
+        <Route path='/admin/orderdetails' element={<AdminOrderDetails/>}/>
         </Route>     
       </Routes>
     </Router>

@@ -1,6 +1,6 @@
 import React,{useEffect, useState} from 'react'
 import Navbar from '../../../components/User/Navbar/Navbar'
-import { CalendarIcon, MapPinIcon, ChevronRightIcon } from 'lucide-react'
+import { CalendarIcon, MapPinIcon, ChevronRightIcon,MessageSquare } from 'lucide-react'
 import { Button } from "../../../components/ui/button"
 import {
   Select,
@@ -22,15 +22,50 @@ import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../../../api/axiosInstance'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../redux/store'
+import ChatUI from '../../../components/Chat/ChatUI'
 
 
-const Orders:React.FC = () => {
+const Orders:React.FC = ({socket}) => {
     const userId = useSelector((state:RootState)=>state.userDetails.userId) as string
     const [filter, setFilter] = useState('all')
+    const[connectionSocket,setConnectionSocket] = useState<Socket<DefaultEventsMap>|null>(null)
     const navigate = useNavigate()
     const[orders,setOrders] = useState([])
+    const[hostId,setHostId] = useState('')
+    const [isOpen,setIsOpen] = useState(false)
+    const buttonTrigger = (hostId) => {
+      setHostId(hostId)
+      setIsOpen(true)
+    }
 
+    const handleClose = () => {
+      setIsOpen(false)
+    }
+
+    useEffect(()=>{
+      if(userId){
+        setConnectionSocket(socket)
+      }
+    },[userId,socket])
     
+    const calculateOrderStatus = (pickUpDate: string, dropOffDate: string,status:string) => {
+      const currentDate = new Date();
+      const startDate = new Date(pickUpDate);
+      const endDate = new Date(dropOffDate);
+
+      if(status==='success'){        
+        if (currentDate < startDate) {
+          return 'Upcoming';
+        } else if (currentDate >= startDate && currentDate <= endDate) {
+          return 'Active';
+        } else {
+          return 'Completed';
+        }
+      }else{
+        return 'Cancelled'
+      }
+      
+    };
     
       const getStatusColor = (status: string) => {
         switch (status.toLowerCase()) {
@@ -41,7 +76,7 @@ const Orders:React.FC = () => {
           case 'completed':
             return 'bg-gray-100 text-gray-800'
           default:
-            return 'bg-gray-100 text-gray-800'
+            return 'bg-gray-100 text-red-500'
         }
       }
 
@@ -51,9 +86,8 @@ const Orders:React.FC = () => {
             userId
           }
         })
-        .then(res=>{
+        .then(res=>{          
           setOrders(res.data)
-          
         })
       },[])
 
@@ -90,11 +124,17 @@ const Orders:React.FC = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {orders.map((order,ind)=>(
+            {orders.map((order,ind)=>{
+              const status = calculateOrderStatus(
+                order?.pickUpDate,
+                order?.dropOffDate,
+                order?.status
+              );
+              return(
                  <TableRow key={ind}>
                  <TableCell>
                    <div className="font-medium">{order?.carId.make.name} {order?.carId.carModel}</div>
-                   <div className="text-sm text-muted-foreground">Order ID: {order?._id}</div>
+                   <div className="text-sm text-muted-foreground">Order ID: <br/>{order?.orderId}</div>
                  </TableCell>
                  <TableCell>
                    <div className="flex items-center">
@@ -107,18 +147,18 @@ const Orders:React.FC = () => {
                  <TableCell>
                    <div className="flex items-center">
                      <MapPinIcon className="mr-2 h-4 w-4 opacity-70" />
-                     <span className="text-sm">Location</span>
+                     <span className="text-sm">{order?.carId.address.split(' ')[0]}</span>
                    </div>
                  </TableCell>
                  <TableCell>
-                   <Badge className={getStatusColor('Upcoming')}>Upcoming</Badge>
+                   <Badge className={getStatusColor(status)}>{status}</Badge>
                  </TableCell>
                  <TableCell>
                    <div className="font-semibold">{order?.amount.toFixed(2)}</div>
                  </TableCell>
                  <TableCell>
                    <div className="flex space-x-2">
-                     <Button variant="outline" size="sm" onClick={()=>navigate('/orderdetails')}>
+                     <Button variant="outline" size="sm" onClick={()=>navigate(`/orderdetails?id=${order?._id}`)}>
                        View Details
                        <ChevronRightIcon className="ml-2 h-4 w-4" />
                      </Button>
@@ -126,9 +166,13 @@ const Orders:React.FC = () => {
                        <Button variant="destructive" size="sm">Cancel</Button>
                      )} */}
                    </div>
+                   
+                 </TableCell>
+                 <TableCell>
+                   <div className="font-semibold"><button className='px-2 py-2 rounded bg-red-500 text-white flex items-center' onClick={()=>buttonTrigger(order?.carId.userId._id)}><MessageSquare/> Connect Host</button></div>
                  </TableCell>
                </TableRow>
-            ))}
+            )})}
              
            
           </TableBody>
@@ -140,6 +184,7 @@ const Orders:React.FC = () => {
         </div>
       )}
     </div>
+    {isOpen?<ChatUI isChatOpen={isOpen} onClose={handleClose} hostId={hostId} socket={connectionSocket}/>:''}
         </div>
         </div>
     </>

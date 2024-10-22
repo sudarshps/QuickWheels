@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import mongoose, { Date, Document, Schema } from "mongoose";
+import mongoose, { Date, Document, Number, Schema } from "mongoose";
 
 interface ILocation {
   type: "Point";
@@ -29,6 +29,7 @@ export interface IUser extends Document {
   role:string[];
   orders:string[];
   approvedHost: Boolean;
+  wallet:ObjectId
 }
 
 const userSchema: Schema<IUser> = new Schema(
@@ -62,6 +63,7 @@ const userSchema: Schema<IUser> = new Schema(
     orders:{type:[String]},
     isActive:{type:Boolean},
     approvedHost: { type: Boolean },
+    wallet:{type:Schema.Types.ObjectId,ref:'Wallet'}
   },
   { timestamps: true }
 );

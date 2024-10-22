@@ -2,9 +2,11 @@ import User, { IUser } from "../models/user_model";
 import CarModel, { ICar } from "../models/car_model";
 import CarMake, { ICarMakeCategory } from "../models/carmake-category_model";
 import CarType, { ICarTypeCategory } from "../models/cartype-category_model";
-import OrderModel,{IOrder} from '../models/orders'
-import { model, Types } from "mongoose";
+import OrderModel, { IOrder } from "../models/orders";
+import { model, ObjectId, Types } from "mongoose";
+import WalletModel from '../models/wallet_model'
 import path from "path";
+import { populate } from "dotenv";
 
 interface UserAddress {
   address: string;
@@ -54,7 +56,7 @@ class UserRepository {
     carData: object,
     isVerified: boolean,
     status: string,
-    isActive:boolean
+    isActive: boolean
   ): Promise<ICar | null> {
     try {
       const user = await User.findOne({ email });
@@ -67,7 +69,7 @@ class UserRepository {
           location: user.location,
           isVerified,
           status,
-          isActive
+          isActive,
         });
 
         const response = await newCar.save();
@@ -188,23 +190,85 @@ class UserRepository {
     return await CarType.find();
   }
 
-  async setCarDate(dateFrom:Date,dateTo:Date,carId:string): Promise<ICar | null> {
-    return await CarModel.findByIdAndUpdate(carId,{availabilityFrom:dateFrom,availabilityTo:dateTo})
+  async setCarDate(
+    dateFrom: Date,
+    dateTo: Date,
+    carId: string
+  ): Promise<ICar | null> {
+    return await CarModel.findByIdAndUpdate(carId, {
+      availabilityFrom: dateFrom,
+      availabilityTo: dateTo,
+    });
   }
 
-  async successOrder(order:object){
-    const orderData = new OrderModel(order)
-    return await orderData.save()
+  async successOrder(order: object) {
+    const orderData = new OrderModel(order);
+    return await orderData.save();
   }
 
-  async userOrders(userId:string){
-    return await OrderModel.find({userId:userId}).populate({path:'carId',populate:{
-      path:'make'
-    }}).exec()
+  async userOrders(userId: string) {
+    return await OrderModel.find({ userId: userId })
+      .populate({
+        path: "carId",
+        populate: [{
+          path: "make",
+        },{path:'userId'}],
+      })
+      .exec();
   }
 
-  async reserveCar(carId:string,toDate:Date,fromDate:Date){
-    return await CarModel.findByIdAndUpdate(carId,{reservedDateFrom:fromDate,reservedDateTo:toDate})
+  async reserveCar(carId: string, toDate: Date, fromDate: Date) {
+    return await CarModel.findByIdAndUpdate(carId, {
+      reservedDateFrom: fromDate,
+      reservedDateTo: toDate,
+    });
+  }
+
+  async removeHostCar(carId: string) {
+    return await CarModel.findByIdAndDelete(carId);
+  } 
+
+  async orderDetails(orderId: string) {
+    return await OrderModel.findById(orderId)
+      .populate([
+        {
+          path: "carId",
+          populate: {
+            path: "make",
+          },
+        },
+        { path: "userId" },
+      ])
+      .exec();
+  }
+
+  async cancelOrder(orderId:string) {
+    return await OrderModel.findByIdAndUpdate(orderId,{status:'cancelled'})
+  }
+
+  async cancelCarReservation(carId:string) {
+    return await CarModel.findByIdAndUpdate(carId,{$unset:{reservedDateFrom:1,reservedDateTo:1}})
+  }
+
+  async createWallet(){
+    const wallet = new WalletModel({balance:0})
+    return wallet.save()
+  }
+
+  async getWallet(userId:string){
+    return await User.findById(userId).select('wallet').populate('wallet')
+  }
+
+  async findWallet(userId:string){
+    return await User.findById(userId).select('wallet')
+  }
+
+  async refundAmount(walletId:string,history:object,amount:number){
+    return await WalletModel.findByIdAndUpdate(walletId,{$inc:{balance:amount},$push:{history:history}}) 
+  } 
+
+  async deductMoney(walletId:string,amount:number,history:object){    
+    return await WalletModel.findByIdAndUpdate(walletId,{$inc:{balance:-amount},$push:{history:history}})
   }
 }
 

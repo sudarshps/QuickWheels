@@ -12,8 +12,7 @@ const ProtectedRoute: React.FC<AllowedRoleType> = ({allowedRoles}) => {
     const role = useSelector((state:RootState)=>state.userDetails.role)
     const navigate = useNavigate();
     const authorized = role?.find(role => allowedRoles.includes(role))
-    
-        
+   
     useEffect(() => {
             if(authorized){
                 <Outlet/>

@@ -206,6 +206,27 @@ class AdminController {
       console.error("error in updating host status", error);
     }
   }
+
+  async getOrderList(req:Request,res:Response):Promise<void> {
+    try {
+      const response = await AdminService.getOrderList()
+      res.json(response)
+    } catch (error) {
+      console.error('error while getting orders list',error);
+      
+    }
+  }
+
+  async getOrderDetails(req:Request,res:Response):Promise<void> {
+    try {
+      const id = req.query.id as string
+      const response = await AdminService.getOrderDetails(id)
+      res.json(response)
+    } catch (error) {
+      console.error('error while fetching order details',error);
+      
+    }
+  }
 }
 
 export default new AdminController();

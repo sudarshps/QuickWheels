@@ -279,7 +279,7 @@ class UserController {
         make,
         dateFrom,
         dateTo
-      );
+      );      
       res.json(carDetails);
     } catch (error) {
       console.error("error in fetching rent car details", error);
@@ -330,13 +330,14 @@ class UserController {
       });
     } catch (error) {
       console.error("error in updating availability date!", error);
-    }
+    } 
   }
 
   async successOrder(req:Request,res:Response):Promise<void> {
     try {
-      const {orderId,toDate,fromDate,carId,paymentId,amount,userId} = req.body
-      const response = await UserService.successOrder(orderId,toDate,fromDate,carId,paymentId,amount,userId)  
+      const {orderId,toDate,fromDate,carId,paymentId,method,amount,userId} = req.body
+      
+      const response = await UserService.successOrder(orderId,toDate,fromDate,carId,paymentId,method,amount,userId)  
       res.json(response)
     } catch (error) {
       console.error('error in posting success order!',error);
@@ -353,6 +354,48 @@ class UserController {
       
     }
   }
-}
 
+  async removeHostCar(req:Request,res:Response):Promise<void> {
+    try {
+      const{carId} = req.body
+      const response = await UserService.removeHostCar(carId)
+      res.json(response)
+    } catch (error) {
+      console.error('error in deleting the host car',error);
+      
+    }
+  }
+
+  async orderDetails(req:Request,res:Response):Promise<void> {
+    try {
+      const orderId = req.query.orderId as string
+      const response = await UserService.orderDetails(orderId)      
+      res.json(response)
+    } catch (error) {
+      console.error('error while getting order details',error);
+    }
+  }
+
+  async cancelOrder(req:Request,res:Response):Promise<void>{
+    try {
+      const orderId = req.body.id as string
+      const response = await UserService.cancelOrder(orderId)
+      res.json(response)
+    } catch (error) {
+      console.error('error in cancelling order',error);
+    }
+  }
+
+  async getWallet(req:Request,res:Response):Promise<void>{
+    try {
+      const userId = req.query.userId as string
+      const response = await UserService.getWallet(userId)
+      res.json(response)
+    } catch (error) {
+      console.error('error while fetching wallet details',error);
+    }
+  }
+
+}
+ 
 export default new UserController();

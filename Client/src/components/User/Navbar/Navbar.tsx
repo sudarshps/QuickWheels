@@ -73,7 +73,7 @@ const Navbar: React.FC<NavbarProps> = ({className}) => {
     axiosInstance
       .get("/authorized")
       .then((res) => {
-        if (res.data.valid) {
+        if (res.data.valid) {          
           const userName = res.data.user.username;
           const email = res.data.user.email;
           const profileUpdated = res.data.user.profileUpdated;
@@ -86,8 +86,8 @@ const Navbar: React.FC<NavbarProps> = ({className}) => {
       })
       .catch((err) => {
         console.error(err)
-        alert(err.response.data.message)
-        navigate('/')
+        // alert(err.response.data.message)
+        // navigate('/')
       });
   }, [dispatch]);
 
@@ -129,6 +129,7 @@ const Navbar: React.FC<NavbarProps> = ({className}) => {
         if (res.data.status) {
           sessionStorage.removeItem('userlocation')
           dispatch(logOut(null));
+          navigate('/')
         }
       });
     } catch (error) {
@@ -260,6 +261,12 @@ const Navbar: React.FC<NavbarProps> = ({className}) => {
                             onClick={() => navigate("/orders")}
                           >
                             Orders
+                          </li>
+                          <li
+                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => navigate("/mywallet")}
+                          >
+                            QuickWallet
                           </li>
                         <li
                           className="px-4 py-2 hover:bg-gray-100 cursor-pointer"

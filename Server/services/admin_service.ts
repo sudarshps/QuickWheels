@@ -6,6 +6,7 @@ import { Types } from "mongoose";
 import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
 import { ICarMakeCategory } from "../models/carmake-category_model";
 import { ICarTypeCategory } from "../models/cartype-category_model";
+import { IOrder } from "../models/orders";
 
 interface AdminValidation {
   validated: boolean;
@@ -315,6 +316,14 @@ class AdminService {
       message:'status updated'
     }
   }
+
+  async getOrderList():Promise<IOrder[]>{
+    return await adminRepository.getOrderList()
+  }
+
+  async getOrderDetails(id:string):Promise<IOrder | null>{
+    return await adminRepository.getOrderDetails(id)
+  } 
 }
 
 export default new AdminService();

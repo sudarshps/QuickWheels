@@ -46,7 +46,7 @@ interface FormData{
 
   
 
-const RegisterForm = () => {
+const RegisterForm = ({isComponent}) => {
 
 
     const [data, setData] = useState(initialData);
@@ -162,10 +162,10 @@ const RegisterForm = () => {
 
   return (
     <>
-     <Navbar />
-     <div className="formbackground min-h-screen flex flex-col items-center justify-center">
+     {!isComponent?<Navbar />:''}
+     <div className={`${!isComponent?`formbackground`:``} min-h-screen flex flex-col items-center justify-center`}>
       <ToastContainer/>
-        <div className="bg-white mt-24 p-8 rounded-md shadow-md w-full md:w-1/2">
+        <div className={`${!isComponent?`bg-white mt-24 p-8 rounded-md shadow-md w-full md:w-1/2`:`ml-5 mt-5`}`}>
           {step}
           <div className="btn-div mt-12 flex justify-end space-x-4">
             {currentStepIndex > 0 && (

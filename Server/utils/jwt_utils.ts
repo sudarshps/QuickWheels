@@ -7,7 +7,7 @@ const accessSecret = process.env.JWT_ACCESS_SECRET
 const refreshSecret = process.env.JWT_REFRESH_SECRET
 
 export const signAccessToken = (payload:object,options?:SignOptions): string => {
-    return jwt.sign(payload,accessSecret as string,{...(options && options),expiresIn:'30m'})
+    return jwt.sign(payload,accessSecret as string,{...(options && options),expiresIn:'1h'})
 }
 
 
@@ -19,13 +19,14 @@ export const verifyToken = (token:string): JwtPayload | void => {
     try {
         return jwt.verify(token,accessSecret as string) as JwtPayload
     } catch (error) {
-        
+        console.error('error verifying token:',error);
+        return undefined 
     }
 }
 
 export const renewToken = (req:Request,res:Response):string | null => {
     const refreshToken = req.cookies.refreshToken
-
+    if (!refreshToken) return null;
     try {
         const decoded = jwt.verify(refreshToken,refreshSecret as string) as JwtPayload
         
@@ -33,7 +34,7 @@ export const renewToken = (req:Request,res:Response):string | null => {
         if(payload){
             const newAccessToken = signAccessToken(payload)
             res.cookie('accessToken',newAccessToken,{
-                maxAge:1800000,
+              maxAge:3600000,
                 httpOnly:true,
                 secure:process.env.NODE_ENV !== 'development',
                 sameSite:'strict'

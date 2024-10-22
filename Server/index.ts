@@ -6,14 +6,13 @@ import userRoutes from './routes/user_routes'
 import authRoutes from './routes/auth_routes'
 import adminRoutes from './routes/admin_routes'
 import otpRoutes from './routes/otp_routes'
+import chatRoutes from './routes/chat_routes'
 import connectDb from './config/database'
 import passportAuth from './config/passport'
 import path from 'path'
 import cookieParser = require('cookie-parser')
-
+import {app,server} from './socket/socket'
 dotenv.config()
-
-const app = express()
 
 connectDb()
 
@@ -42,10 +41,13 @@ app.use(express.json())
 app.use('/',userRoutes)
 app.use('/',authRoutes)
 app.use('/',otpRoutes)
+app.use('/chat',chatRoutes)
 app.use('/admin',adminRoutes)
 
 const PORT = process.env.port || 3000
 
-app.listen(PORT,()=>{
+
+
+server.listen(PORT,()=>{
     console.log('Server is running'); 
 }) 

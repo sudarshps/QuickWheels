@@ -31,11 +31,33 @@ const Home: React.FC = () => {
     navigate('/availablecars')
   }
   
-  useEffect(()=>{
-    if(date){
-      sessionStorage.setItem('date',JSON.stringify(date))
+  // useEffect(()=>{
+  //   if(date){
+  //     sessionStorage.setItem('date',JSON.stringify(date))
+  //   }
+  // },[date])
+
+
+  useEffect(() => {
+    if (date && date.from && date.to) {
+      // Convert the dates to local time instead of UTC
+      const fromLocalTime = new Date(
+        date.from.getTime() - date.from.getTimezoneOffset() * 60000
+      ).toISOString();
+      
+      const toLocalTime = new Date(
+        date.to.getTime() - date.to.getTimezoneOffset() * 60000
+      ).toISOString();
+  
+      const formattedDate = {
+        from: fromLocalTime,
+        to: toLocalTime,
+      };
+  
+      sessionStorage.setItem("date", JSON.stringify(formattedDate));
     }
-  },[date])
+  }, [date]);
+  
 
   useEffect(()=>{
     const storedLocation = sessionStorage.getItem('userlocation')

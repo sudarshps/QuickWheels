@@ -8,7 +8,7 @@ const router: Router = Router()
 
 router.post('/checkMail',userController.checkUserMail)
 router.post('/userRegister',userController.createUser) 
-router.post('/userLogin',userController.userLogin)
+router.post('/userLogin',userController.userLogin) 
 router.post('/userprofile',upload.fields([{name:'drivingIDFront',maxCount:1},{name:'drivingIDBack',maxCount:1}]),userController.userProfileCompletion)
 router.post('/logout',userController.userLogout)
 router.get('/authorized',verifyUser,userController.authorizedUser) 
@@ -23,7 +23,10 @@ router.get('/getcardetails',verifyUser,userController.carDetails)
 router.put('/setavailablitydate',verifyUser,userController.setCarDate)
 router.post('/successorder',verifyUser,userController.successOrder)
 router.get('/userorders',verifyUser,userController.userOrders)
-
+router.delete('/removecarfromhost',verifyUser,userController.removeHostCar)
+router.get('/orderdetails',verifyUser,userController.orderDetails)
+router.put('/cancelorder',verifyUser,userController.cancelOrder)
+router.get('/getwalletdetails',verifyUser,userController.getWallet)
 //razor pay
 router.post('/order',verifyUser,makeOrder)
 

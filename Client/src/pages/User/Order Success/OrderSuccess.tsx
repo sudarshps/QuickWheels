@@ -1,11 +1,29 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { CheckCircle, Calendar, Car, CreditCard } from 'lucide-react';
 import { Card, CardContent, CardHeader } from '../../../components/ui/card';
 import Navbar from '../../../components/User/Navbar/Navbar';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import axiosInstance from '../../../api/axiosInstance';
 
 const OrderSuccess:React.FC = () => {
     const navigate = useNavigate()
+    const [searchParams] = useSearchParams()
+    const orderId = searchParams.get('id')
+
+    const[orderDetails,setOrderDetails] = useState()
+
+    useEffect(()=>{
+      axiosInstance.get('/orderdetails',{
+        params:{
+          orderId
+        }
+      })
+      .then(res=>{
+        if(res.data){
+          setOrderDetails(res.data)
+        }
+      })
+    },[])
   return (
     <>
     <Navbar/>
@@ -26,21 +44,21 @@ const OrderSuccess:React.FC = () => {
                 <Car className="h-6 w-6 text-red-600" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-900">Vehicle</p>
-                  <p className="text-sm text-gray-600">Volkswagan Polo</p>
+                  <p className="text-sm text-gray-600">{orderDetails?.carId.make.name} {orderDetails?.carId.carModel}</p>
                 </div>
               </div>
               <div className="flex items-center">
                 <Calendar className="h-6 w-6 text-red-600" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-900">Rental Period</p>
-                  <p className="text-sm text-gray-600">Oct 13 - Oct 14, 2024</p>
+                  <p className="text-sm text-gray-600">{orderDetails?.pickUpDate.slice(0,10)} - {orderDetails?.dropOffDate.slice(0,10)}</p>
                 </div>
               </div>
               <div className="flex items-center">
                 <CreditCard className="h-6 w-6 text-red-600" />
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-900">Payment</p>
-                  <p className="text-sm text-gray-600">6780.00 - Paid</p>
+                  <p className="text-sm text-gray-600">{orderDetails?.amount}.00 - Paid</p>
                 </div>
               </div>
               <div className="flex items-center">
@@ -49,14 +67,14 @@ const OrderSuccess:React.FC = () => {
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-900">Order ID</p>
-                  <p className="text-sm text-gray-600">123467</p>
+                  <p className="text-sm text-gray-600">{orderDetails?.orderId}</p>
                 </div>
               </div>
             </div>
           </div>
           
           <div className="mt-6 flex justify-center">
-            <button className="bg-red-600 text-white px-6 py-3 rounded-md hover:bg-red-700 transition-colors" onClick={()=>navigate('/orderdetails')}>
+            <button className="bg-red-600 text-white px-6 py-3 rounded-md hover:bg-red-700 transition-colors" onClick={()=>navigate(`/orderdetails?id=${orderId}`)}>
               View Booking Details
             </button>
           </div>

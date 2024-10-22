@@ -7,6 +7,7 @@ import { ICar } from "../models/car_model";
 import { ICarMakeCategory } from "../models/carmake-category_model";
 import { ICarTypeCategory } from "../models/cartype-category_model";
 import { IOrder } from "../models/orders";
+import { IWallet } from "../models/wallet_model";
 
 interface EmailValidate {
   emailExists: boolean;
@@ -37,15 +38,15 @@ interface CarDetailsResponse {
 
 interface CarDetails {
   carDetails: boolean;
-  id?:ObjectId;
+  id?: ObjectId;
   model?: string;
   registerNumber?: string;
   insuranceExp?: string;
   images?: string[];
   status?: string;
   note?: string;
-  dateFrom?:Date,
-  dateTo?:Date,
+  dateFrom?: Date;
+  dateTo?: Date;
   message: string;
 }
 
@@ -57,14 +58,14 @@ interface userValidate {
   userId?: ObjectId;
   profileUpdated?: boolean;
   isHost?: boolean;
-  isVerified?:boolean;
+  isVerified?: boolean;
   status?: string;
   role?: string[];
   message?: string;
 }
 
 interface UserDetails {
-  id?:ObjectId;
+  id?: ObjectId;
   dob: string;
   phone: string;
   address: string;
@@ -85,19 +86,41 @@ type ICarWithHostName = ICar & {
 };
 
 interface OrderType {
-  successOrder:boolean,
-  message:string
+  successOrder: boolean;
+  message: string;
+}
+
+interface CarStatus {
+  isRemoved: boolean;
+  message: string;
+}
+
+interface OrderCancelType {
+  isCancelled: boolean;
+  message: string;
 }
 
 class UserService {
   async createUser(userData: Partial<IUser>): Promise<UserResponse> {
     const hashedPassword = await bcrypt.hash(userData.password as string, 10);
     userData.password = hashedPassword;
+
+    const userWallet = await userRepository.createWallet();
+
+    if (!userWallet) {
+      return {
+        userCreated: false,
+        message: "error while registering user wallet",
+      };
+    }
+
+    userData.wallet = userWallet._id;
     const user = await userRepository.createUser(userData);
 
     if (user) {
       // const accesstoken = signAccessToken({id:user._id,email:user.email})
       // const refreshToken = signRefreshToken({id:user._id,email:user.email})
+
       return {
         userCreated: true,
         userId: user._id,
@@ -231,7 +254,7 @@ class UserService {
     carData: object,
     isVerified: boolean,
     status: string,
-    isActive:boolean
+    isActive: boolean
   ): Promise<CarDetailsResponse> {
     const carDetails = await userRepository.carDetails(
       email,
@@ -258,14 +281,14 @@ class UserService {
     const carDetails = await userRepository.getCarDetails(email);
 
     if (!carDetails) {
-      return null
+      return null;
     }
 
-    return carDetails
+    return carDetails;
   }
-  
+
   async rentCarDetails(
-    userId:string,
+    userId: string,
     sort: string,
     transmission: string[],
     fuel: string[],
@@ -275,29 +298,30 @@ class UserService {
     distanceValue: number,
     searchInput: string,
     carType: string[],
-    make:string,
-    dateFrom:Date | undefined,
-    dateTo:Date | undefined
+    make: string,
+    dateFrom: Date | undefined,
+    dateTo: Date | undefined
   ): Promise<ICar[] | null> {
     let carDetails = await userRepository.getRentCarDetails();
 
     if (carDetails && lng !== 0 && lat !== 0) {
       carDetails = await userRepository.getCarDistance(lng, lat, distanceValue);
     }
-    
 
     if (carDetails && searchInput.trim()) {
       const regex = new RegExp(searchInput, "i");
       carDetails = carDetails?.filter((car) => {
-        const carTypeName = 
-          car.carType && typeof car.carType === "object" && "name" in car.carType
+        const carTypeName =
+          car.carType &&
+          typeof car.carType === "object" &&
+          "name" in car.carType
             ? car.carType.name
-            : ""; 
-        const carMakeName = 
-          car.make && typeof car.make === 'object' && 'name' in car.make 
+            : "";
+        const carMakeName =
+          car.make && typeof car.make === "object" && "name" in car.make
             ? car.make.name
-            : "";    
-                         
+            : "";
+
         return (
           regex.test(carMakeName) ||
           regex.test(carTypeName) ||
@@ -313,40 +337,37 @@ class UserService {
       return null;
     }
 
-    
+    if (dateFrom && dateTo) {
+      carDetails = carDetails.filter((car) => {
+        const from = new Date(dateFrom);
+        const to = new Date(dateTo);
+        if (car.reservedDateFrom && car.reservedDateTo) {
+          return (
+            to < car.reservedDateFrom ||
+            (from > car.reservedDateTo &&
+              from >= car.availabilityFrom &&
+              to <= car.availabilityTo)
+          );
+        }
 
-    if(dateFrom && dateTo){
-      
-        carDetails = carDetails.filter((car)=>{
-          const from = new Date(dateFrom)
-          const to = new Date(dateTo) 
-          
-          const isAvailable = to<car.reservedDateFrom || from > car.reservedDateTo
-          
-          return(
-            isAvailable && from>=car.availabilityFrom && to<=car.availabilityTo 
-          )
-        })
-    }    
-    
-    if(userId){
-      carDetails = carDetails.filter((car)=>{
-        
-        return(
-          car.userId.toString() !== userId
-        )
-      })
+        return from >= car.availabilityFrom && to <= car.availabilityTo;
+      });
     }
 
-    if(make){
+    if (userId) {
       carDetails = carDetails.filter((car) => {
-        const carMakeName = 
-        typeof car.make === 'object' && 'name' in car.make 
-          ? car.make.name
-          : ""; 
-          return carMakeName === make
-      }
-      )
+        return car.userId.toString() !== userId;
+      });
+    }
+
+    if (make) {
+      carDetails = carDetails.filter((car) => {
+        const carMakeName =
+          typeof car.make === "object" && "name" in car.make
+            ? car.make.name
+            : "";
+        return carMakeName === make;
+      });
     }
 
     if (transmission && transmission.length > 0) {
@@ -355,15 +376,14 @@ class UserService {
       );
     }
 
-    if(carType && carType.length > 0) {
-
-      carDetails = carDetails.filter((car) =>{
+    if (carType && carType.length > 0) {
+      carDetails = carDetails.filter((car) => {
         const carTypeName =
-        typeof car.carType === "object" && "name" in car.carType
-          ? car.carType.name
-          : "";           
-        return carType.includes(carTypeName)
-      })
+          typeof car.carType === "object" && "name" in car.carType
+            ? car.carType.name
+            : "";
+        return carType.includes(carTypeName);
+      });
     }
 
     if (fuel && fuel.length > 0) {
@@ -384,7 +404,9 @@ class UserService {
       );
     }
 
-    carDetails = carDetails.filter((car) => car.isVerified === true && car.isActive === true);
+    carDetails = carDetails.filter(
+      (car) => car.isVerified === true && car.isActive === true
+    );
 
     return carDetails;
   }
@@ -415,43 +437,166 @@ class UserService {
     return await userRepository.getCarType();
   }
 
-  async setCarDate(dateFrom:Date,dateTo:Date,carId:string): Promise<ICar | null> {
-    return await userRepository.setCarDate(dateFrom,dateTo,carId)
+  async setCarDate(
+    dateFrom: Date,
+    dateTo: Date,
+    carId: string
+  ): Promise<ICar | null> {
+    return await userRepository.setCarDate(dateFrom, dateTo, carId);
   }
-  async successOrder(orderId:string,toDate:Date,fromDate:Date,carId:string,paymentId:string,amount:number,userId:string):Promise<OrderType | undefined>{
+  async successOrder(
+    orderId: string,
+    toDate: Date,
+    fromDate: Date,
+    carId: string,
+    paymentId: string,
+    method: string,
+    amount: number,
+    userId: string
+  ): Promise<IOrder | undefined> {
+    let orderAmount = amount
+    if(method==='razorpay'){
+      orderAmount = amount/100
+    }
+    
     const order = {
-      orderId:orderId,
-      carId:carId,
-      amount:amount/100,
-      pickUpDate:fromDate,
-      dropOffDate:toDate,
-      userId:userId,
-      paymentId:paymentId,
-      status:'success'
+      orderId: orderId,
+      carId: carId,
+      amount: orderAmount,
+      pickUpDate: fromDate,
+      dropOffDate: toDate,
+      userId: userId,
+      paymentId: paymentId,
+      method: method,
+      status: "success",
+    };
+    const response = await userRepository.successOrder(order);
+    if (!response) {
+      return undefined;
     }
-    const response = await userRepository.successOrder(order)
-    if(!response){
-      return{
-        successOrder:false,
-        message:'failed to create order'
-      }
-    }
-    const reserveCar = await userRepository.reserveCar(carId,toDate,fromDate)
-    if(!reserveCar){
-      return{
-        successOrder:false,
-        message:'failed to create order'
-      }
-    }
-    return{
-      successOrder:true,
-      message:'order created successfully!'
-    } 
 
+    // wallet money deduction
+    if (method === "wallet") {
+
+      const getWallet = await userRepository.getWallet(userId);
+      const walletId = getWallet?.wallet._id.toString();
+      if (!walletId) {
+        return undefined;
+      }
+      const history = {
+        date: new Date(),
+        type: "Debit",
+        amount: amount,
+        reason: "Order Placed",
+      };
+
+      const moneyDeducted = await userRepository.deductMoney(
+        walletId,
+        amount,
+        history
+      );
+
+      if (!moneyDeducted) {
+        return undefined;
+      }
+      const reserveCar = await userRepository.reserveCar(
+        carId,
+        toDate,
+        fromDate
+      );
+      
+      if (!reserveCar) {
+        return undefined;
+      }
+      return response;
+    }
+    const reserveCar = await userRepository.reserveCar(carId, toDate, fromDate);
+    if (!reserveCar) {
+      return undefined;
+    }
+    return response;
   }
 
-  async userOrders(userId:string):Promise<IOrder[] | null> {
-    return await userRepository.userOrders(userId)
+  async userOrders(userId: string): Promise<IOrder[] | null> {
+    return await userRepository.userOrders(userId);
+  }
+
+  async removeHostCar(carId: string): Promise<CarStatus> {
+    const response = await userRepository.removeHostCar(carId);
+    if (!response) {
+      return {
+        isRemoved: false,
+        message: "car removal failed",
+      };
+    }
+    return {
+      isRemoved: true,
+      message: "car removed successfully",
+    };
+  }
+
+  async orderDetails(orderId: string): Promise<IOrder | null> {
+    return await userRepository.orderDetails(orderId);
+  }
+
+  async cancelOrder(orderId: string): Promise<OrderCancelType> {
+    const response = await userRepository.cancelOrder(orderId);
+    if (!response) {
+      return {
+        isCancelled: false,
+        message: "Order was not cancelled",
+      };
+    }
+    // removing the reserved date from car model
+    const carId = response.carId.toString();
+    const updateCarDetails = await userRepository.cancelCarReservation(carId);
+
+    if (!updateCarDetails) {
+      return {
+        isCancelled: false,
+        message: "Order was not cancelled",
+      };
+    }
+    const amount = response.amount;
+    const userId = response.userId.toString();
+    const reason = "Cancelled the order";
+    const refundDate = new Date();
+    const getWalletId = await userRepository.findWallet(userId);
+
+    const history = {
+      date: refundDate,
+      type: "Credit",
+      amount: amount,
+      reason: reason, 
+    };
+    if (!getWalletId) {
+      return {
+        isCancelled: false,
+        message: "refund error",
+      };
+    }
+    const walletId = getWalletId.wallet.toString();
+
+    const refundAmount = await userRepository.refundAmount(
+      walletId,
+      history,
+      amount
+    );
+
+    if (!refundAmount) {
+      return {
+        isCancelled: false,
+        message: "refund error",
+      };
+    }
+    return {
+      isCancelled: true,
+      message: "Order cancellation successful",
+    };
+  }
+
+  async getWallet(userId: string): Promise<Partial<IUser> | null> {
+    return await userRepository.getWallet(userId);
   }
 }
 
