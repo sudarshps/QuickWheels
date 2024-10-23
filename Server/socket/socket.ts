@@ -1,35 +1,44 @@
-import {Server} from 'socket.io'
-import { createServer } from 'http'
-import express from 'express'
+import { Server } from "socket.io";
+import { createServer } from "http";
+import express from "express";
 
+const app = express();
+const server = createServer(app);
+const io = new Server(server, {
+  pingTimeout: 60000,
+  cors: {
+    origin: ["http://localhost:5173"],
+    methods: ["GET", "POST"],
+    credentials: true,
+  },
+}); 
 
-const app = express()
-const server = createServer(app)
-const io = new Server(server,{
-    pingTimeout:60000,
-    cors:{
-        origin:['http://localhost:5173'],
-        methods: ['GET', 'POST'],
-        credentials: true,
-    } 
-})
+io.on("connection", (socket) => {
+  // console.log('a user connected',socket.id);
 
+  socket.on("setup", (userId) => {    
+    socket.join(userId);
+    socket.emit("connected");
+  });
 
-io.on('connection', (socket) => {  
-    // console.log('a user connected',socket.id);
-    
-    socket.on('setup',(userId) => { 
-        console.log('lol',userId);
-    })
+  socket.on("join chat", (room) => {
+    socket.join(room);
+  });
 
-    socket.on('message',(data) => {
-         
-    })
-
-    socket.on('disconnect',()=>{
-        console.log('user disconnected');
+  socket.on("message", (message) => {
+    let chat = message.chat
+      
+    chat.users.forEach((user:any)=>{
+        if(user === message.sender._id) return
+        
+        socket.in(user).emit("message received",message)
+        
     })
   });
 
+  socket.on("disconnect", () => {
+    // console.log("user disconnected");
+  });
+});
 
-  export {app,io,server}
+export { app, io, server };

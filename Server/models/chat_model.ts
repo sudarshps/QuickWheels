@@ -4,8 +4,8 @@ import mongoose,{Document,Schema} from 'mongoose'
 
 export interface IChat extends Document{
     _id:ObjectId,
-    users:[ObjectId],
-    messages:[ObjectId],
+    users:[object],
+    latestMessage:object,
 
 }
 
@@ -15,11 +15,10 @@ const chatSchema:Schema<IChat> = new Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:'User'
     }],
-    messages:[{
+    latestMessage:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Message',
-        default:[]
-    }]
+    }
 },{timestamps:true})
 
 

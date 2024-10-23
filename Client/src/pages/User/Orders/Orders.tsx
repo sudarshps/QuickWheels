@@ -22,31 +22,31 @@ import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../../../api/axiosInstance'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../redux/store'
-import ChatUI from '../../../components/Chat/ChatUI'
+import ChatUI from '../../../components/Chat/MainChatUI'
 
 
 const Orders:React.FC = ({socket}) => {
     const userId = useSelector((state:RootState)=>state.userDetails.userId) as string
     const [filter, setFilter] = useState('all')
-    const[connectionSocket,setConnectionSocket] = useState<Socket<DefaultEventsMap>|null>(null)
     const navigate = useNavigate()
     const[orders,setOrders] = useState([])
     const[hostId,setHostId] = useState('')
+    const[chatId,setChatId] = useState('')
     const [isOpen,setIsOpen] = useState(false)
-    const buttonTrigger = (hostId) => {
+    const buttonTrigger = (hostId:string) => {
       setHostId(hostId)
-      setIsOpen(true)
+      axiosInstance.post('/chat/accesschat',{receiverId:hostId,senderId:userId})
+      .then(res=>{
+        if(res.data){
+          setChatId(res.data._id)
+          setIsOpen(true)
+        }
+      })
     }
 
     const handleClose = () => {
       setIsOpen(false)
-    }
-
-    useEffect(()=>{
-      if(userId){
-        setConnectionSocket(socket)
-      }
-    },[userId,socket])
+    }        
     
     const calculateOrderStatus = (pickUpDate: string, dropOffDate: string,status:string) => {
       const currentDate = new Date();
@@ -184,7 +184,7 @@ const Orders:React.FC = ({socket}) => {
         </div>
       )}
     </div>
-    {isOpen?<ChatUI isChatOpen={isOpen} onClose={handleClose} hostId={hostId} socket={connectionSocket}/>:''}
+    {isOpen?<ChatUI isChatOpen={isOpen} onClose={handleClose} hostId={hostId} chatId={chatId} socket={socket}/>:''}
         </div>
         </div>
     </>

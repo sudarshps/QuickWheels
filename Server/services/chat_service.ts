@@ -1,43 +1,71 @@
+import { ObjectId,Types } from 'mongoose'
 import { IChat } from '../models/chat_model'
 import { IMessage } from '../models/message_model'
 import ChatRepository from '../repositories/chat_repository'
 
 class ChatService {
-    async sendMessage(message:string,receiverId:string,senderId:string):Promise<IMessage | undefined| null> {
+    async accessChat(receiverId:string,senderId:string):Promise<IChat | undefined| null> {
         try {
             let chat = await ChatRepository.checkChat(receiverId,senderId)
  
             if(!chat){
-                 chat = await ChatRepository.createChat(receiverId,senderId)
+                 const createChat = await ChatRepository.createChat(receiverId,senderId)
+                 chat = await ChatRepository.checkChat(receiverId,senderId)
             }
-
-            const newMessage = await ChatRepository.newMessage(receiverId,senderId,message) as IMessage
-
-            if(!chat || !newMessage){
-                return null 
-            }
-            const chatId = chat._id.toString()
-            if(newMessage && '_id' in newMessage){
-                const messageId = (newMessage._id as unknown as string).toString()
-                const pushMessage = await ChatRepository.pushMessage(chatId,messageId)
-                if(!pushMessage){
-                    return null
-                }
-                return newMessage
-            }
-            return null
+            return chat
+           
         } catch (error) {
             console.error('error in sending message',error);
         }
     }
 
-    async getMessages(senderId:string,receiverId:string):Promise<IChat | undefined | null>{
-        try {
-            const message = await ChatRepository.getMessages(senderId,receiverId)
-            if(!message)return null
-            return message
+    async getChat(userId:string):Promise<IChat[] | undefined | null>{
+        try {            
+            let chats = await ChatRepository.getChat(userId)            
+            if(!chats){
+                return null
+            }
+            chats = chats?.map(chat => {
+                const chatObject = chat.toObject(); // Convert Mongoose object to plain JS object
+                chatObject.users = chatObject.users.filter((user: any) => user._id.toString() !== userId); // Exclude the logged-in user
+                return chatObject;
+            })
+            
+            return chats
         } catch (error) {
             console.error('error while fetching messages',error);
+        }
+    }
+
+    async sendMessage(chatId:string,senderId:string,content:string):Promise<IMessage | null | undefined> {
+        try {
+            const newMessage = {
+                sender:senderId,
+                chat:chatId,
+                content
+            }
+            const message = await ChatRepository.sendMessage(newMessage)
+            if(!message){
+                return null
+            }
+            const messageId = new Types.ObjectId(message._id)
+            const latestMessage = await ChatRepository.latestMessage(chatId,messageId)
+            if(!latestMessage){
+                return null
+            }
+            return message
+        } catch (error) {
+            console.error('error in sending message',error);
+            
+        }
+    }
+
+    async getMessage(chatId:string):Promise<IMessage[] | null | undefined>{
+        try {
+            return await ChatRepository.getMessage(chatId)
+        } catch (error) {
+            console.error('error while fetching message list',error);
+            
         }
     }
 }

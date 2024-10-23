@@ -29,6 +29,7 @@ import AdminOrders from './pages/Admin/Orders/AdminOrders.tsx'
 import OrderSuccess from './pages/User/Order Success/OrderSuccess.tsx'
 import AdminOrderDetails from './pages/Admin/Order Details/OrderDetails.tsx'
 import {io} from 'socket.io-client'
+import ChatWidget from './components/Chat/MainChatUI.tsx'
 
 const socket = io('http://localhost:3000',{
   withCredentials:true
@@ -52,9 +53,9 @@ function App() {
 
         <Route element={<ProtectedRoute allowedRoles={['USER']}/>}>
         <Route path='/becomehost' element={<HostStartup/>}/>
-        <Route path='/profile' element={<Profile/>}/>
+        <Route path='/profile' element={<><Profile/><ChatWidget  socket={socket}/></>}/>
         <Route path='/hostregister' element={<RegisterForm/>}/>
-        <Route path='/orders' element={<Orders socket={socket}/>}/>
+        <Route path='/orders' element={<><Orders socket={socket}/><ChatWidget socket={socket}/></>}/>
         <Route path='/orderdetails' element={<OrderDetails/>}/>
         <Route path='/orderplaced' element={<OrderSuccess/>}/>
         <Route path='/mywallet' element={<WalletUI/>}/>
