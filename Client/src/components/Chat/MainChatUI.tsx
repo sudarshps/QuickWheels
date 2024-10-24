@@ -15,6 +15,7 @@ const ChatWidget:React.FC = ({isChatOpen,hostId,onClose,chatId,socket}) => {
   const [userChatId, setUserChatId] = useState('');
   const [socketConnected, setSocketConnected] = useState(false);
   const [messages, setMessages] = useState([]);
+  const [activeUsers, setActiveUsers] = useState([]);
   const [chats,setChats] = useState<[object]|null>([])
 
   const userId = useSelector((state:RootState)=>state.userDetails.userId)
@@ -36,11 +37,19 @@ const ChatWidget:React.FC = ({isChatOpen,hostId,onClose,chatId,socket}) => {
   };
 
     useEffect(()=>{  
-    if(userId){      
+    if(userId && isOpen){  
       socket.emit('setup',userId)
-      socket.on('connection',()=>setSocketConnected(true))
+      socket.on('connection',()=>{
+        setSocketConnected(true)
+      })
+
+      socket.on('get-users',(users)=>{        
+        setActiveUsers(users)
+      })
+    }else{
+      socket.emit('offline')
     }
-  },[userId,socket])
+  },[isOpen,userId])
 
   useEffect(()=>{
     setIsOpen(isChatOpen)
@@ -113,7 +122,7 @@ const ChatWidget:React.FC = ({isChatOpen,hostId,onClose,chatId,socket}) => {
   },[selectedUser])
 
   useEffect(()=>{
-    socket.on('message received',(message) => {      
+    socket.on('message received',(message) => {            
         setMessages([...messages,message])
     })
   })
@@ -142,9 +151,9 @@ const ChatWidget:React.FC = ({isChatOpen,hostId,onClose,chatId,socket}) => {
                     key={user.users[0]._id}
                     onClick={() => handleUserSelection(user)}
                     className={`p-4 flex items-center space-x-3 cursor-pointer hover:bg-gray-100 transition-colors
-                      ${selectedUser?.id === user._id ? 'bg-blue-50' : ''}`}
+                      ${selectedUser?.id === user.users[0]._id ? 'bg-blue-50' : ''}`}
                   >
-                    <div className={`w-2 h-2 rounded-full ${user.online ? 'bg-green-500' : 'bg-gray-300'}`} />
+                    <div className={`w-2 h-2 rounded-full ${activeUsers.some(activeUser=>activeUser.userId === user.users[0]._id) ? 'bg-green-500' : 'bg-gray-300'}`} />
                     <span className="truncate">{user?.users[0].name}</span>
                   </div>
                 ))}
@@ -160,7 +169,7 @@ const ChatWidget:React.FC = ({isChatOpen,hostId,onClose,chatId,socket}) => {
                 <>
                   <div className="p-4 border-b flex items-center justify-between bg-white">
                     <div className="flex items-center space-x-2">
-                      <div className={`w-2 h-2 rounded-full ${selectedUser.online ? 'bg-green-500' : 'bg-gray-300'}`} />
+                      <div className={`w-2 h-2 rounded-full ${activeUsers.some(user=>user.userId === selectedUser._id) ? 'bg-green-500' : 'bg-gray-300'}`} />
                       <span className="font-semibold">{selectedUser.name}</span>
                     </div>
                   </div>

@@ -12,7 +12,7 @@ class ChatService {
                  const createChat = await ChatRepository.createChat(receiverId,senderId)
                  chat = await ChatRepository.checkChat(receiverId,senderId)
             }
-            return chat
+            return chat 
            
         } catch (error) {
             console.error('error in sending message',error);
